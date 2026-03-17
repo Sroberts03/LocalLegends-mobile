@@ -35,15 +35,19 @@ class MockDataStore {
         const game3 = new Game(3, 3, "user3", 3, "Weekend Football", "Looking for players for football this weekend!", 12, 6, GameStatus.Coordination, new Date(), new Date(), false, SkillLevel.Advanced, GenderPreference.AllMale, 3);
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
-        const game4 = new Game(4, 1, "user2", 1, "Afternoon Basketball", "Basketball in the afternoon!", 10, 2, GameStatus.Active, tomorrow, tomorrow, false, SkillLevel.Intermediate, GenderPreference.NoPreference, 5);
+        const game4 = new Game(4, 1, "user2", 2, "Afternoon Basketball", "Basketball in the afternoon!", 10, 2, GameStatus.Active, tomorrow, tomorrow, false, SkillLevel.Intermediate, GenderPreference.NoPreference, 5);
+        const game5 = new Game(5, 2, "user1", 2, "Morning Soccer", "Soccer in the morning!", 22, 4, GameStatus.Active, tomorrow, tomorrow, false, SkillLevel.Beginner, GenderPreference.Coed, 10);
+        const game6 = new Game(6, 3, "user3", 1, "Weekend Football", "Football this weekend!", 12, 6, GameStatus.Coordination, tomorrow, tomorrow, false, SkillLevel.Advanced, GenderPreference.AllMale, 3);
         this.Games.set(game1.id, game1);
         this.Games.set(game2.id, game2);
         this.Games.set(game3.id, game3);
         this.Games.set(game4.id, game4);
+        this.Games.set(game5.id, game5);
+        this.Games.set(game6.id, game6);
 
         this.userGames.set("user1", [1,3]);
         this.userGames.set("user2", [2,4]);
-        this.userGames.set("user3", [3]);
+        this.userGames.set("user3", [3,6]);
 
         // Initialize mock location data
         const location1 = new Location(1, "testGoogle", "Mission Playground Basketball Court", "2450 Harrison St", "San Francisco", "California", "94110", "USA", 37.758900, -122.412200);
