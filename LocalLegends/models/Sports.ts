@@ -3,15 +3,15 @@ export default class Sports {
     name: string;
     category: SportCategory;
     slug: string;
-    image_url: string;
+    imageUrl: string;
     status: string;
 
-    constructor(id: number, name: string, category: SportCategory, slug: string, image_url: string, status: string) {
+    constructor(id: number, name: string, category: SportCategory, slug: string, imageUrl: string, status: string) {
         this.id = id;
         this.name = name;
         this.category = category;
         this.slug = slug;
-        this.image_url = image_url;
+        this.imageUrl = imageUrl;
         this.status = status;
     }
 }

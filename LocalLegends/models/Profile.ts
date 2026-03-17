@@ -1,14 +1,14 @@
 export class Profile {
     id: string;
-    display_name: string;
+    displayName: string;
     status: ProfileStatus;
-    profile_image_url?: string;
+    profileImageUrl?: string;
 
-    constructor(id: string, display_name: string, status: ProfileStatus, profile_image_url?: string) {
+    constructor(id: string, displayName: string, status: ProfileStatus, profileImageUrl?: string) {
         this.id = id;
-        this.display_name = display_name;
+        this.displayName = displayName;
         this.status = status;
-        this.profile_image_url = profile_image_url;
+        this.profileImageUrl = profileImageUrl;
     }
 }
 

@@ -1,51 +1,51 @@
 export default class Game {
     id: number;
-    sport_id: number;
-    creator_id: number;
-    location_id: number;
+    sportId: number;
+    creatorId: number;
+    locationId: number;
     name: string;
     description: string;
-    max_players: number;
-    min_players: number;
+    maxPlayers: number;
+    minPlayers: number;
     status: GameStatus;
-    start_time: Date;
-    end_time: Date;
-    is_recurring: boolean;
-    skill_level: SkillLevel;
-    gender_preference: GenderPreference;
-    current_player_count: number;
+    startTime: Date;
+    endTime: Date;
+    isRecurring: boolean;
+    skillLevel: SkillLevel;
+    genderPreference: GenderPreference;
+    currentPlayerCount: number;
 
     constructor(
         id: number, 
-        sport_id: number, 
-        creator_id: number, 
-        location_id: number, 
+        sportId: number, 
+        creatorId: number, 
+        locationId: number, 
         name: string, description: 
-        string, max_players: number, 
-        min_players: number, 
+        string, maxPlayers: number, 
+        minPlayers: number, 
         status: GameStatus, 
-        start_time: Date, 
-        end_time: Date, 
-        is_recurring: boolean, 
-        skill_level: SkillLevel, 
-        gender_preference: GenderPreference, 
-        current_player_count: number
+        startTime: Date, 
+        endTime: Date, 
+        isRecurring: boolean, 
+        skillLevel: SkillLevel, 
+        genderPreference: GenderPreference, 
+        currentPlayerCount: number
     ) {
         this.id = id;
-        this.sport_id = sport_id;
-        this.creator_id = creator_id;
-        this.location_id = location_id;
+        this.sportId = sportId;
+        this.creatorId = creatorId;
+        this.locationId = locationId;
         this.name = name;
         this.description = description;
-        this.max_players = max_players;
-        this.min_players = min_players;
+        this.maxPlayers = maxPlayers;
+        this.minPlayers = minPlayers;
         this.status = status;
-        this.start_time = start_time;
-        this.end_time = end_time;
-        this.is_recurring = is_recurring;
-        this.skill_level = skill_level;
-        this.gender_preference = gender_preference;
-        this.current_player_count = current_player_count;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.isRecurring = isRecurring;
+        this.skillLevel = skillLevel;
+        this.genderPreference = genderPreference;
+        this.currentPlayerCount = currentPlayerCount;
     }
 }
 
@@ -65,8 +65,8 @@ export enum SkillLevel {
 }
 
 export enum GenderPreference {
-    AllMale = 'all_male',
-    AllFemale = 'all_female',
+    AllMale = 'all male',
+    AllFemale = 'all female',
     Coed = 'coed',
-    NoPreference = 'no_preference'
+    NoPreference = 'no preference'
 }

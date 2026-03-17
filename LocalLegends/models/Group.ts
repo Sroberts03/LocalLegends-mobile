@@ -1,28 +1,28 @@
 export default class Group {
     id: number;
     name: string;
-    game_id: number;
+    gameId: number;
     status: GroupStatus;
-    system_message_id: number;
-    last_message_id: number;
-    created_at: Date;
+    systemMessageId: number;
+    lastMessageId: number;
+    createdAt: Date;
 
     constructor(
         id: number, 
         name: string, 
-        game_id: number, 
+        gameId: number, 
         status: GroupStatus, 
-        system_message_id: number, 
-        last_message_id: number, 
-        created_at: Date
+        systemMessageId: number, 
+        lastMessageId: number, 
+        createdAt: Date
     ) {
         this.id = id;
         this.name = name;
-        this.game_id = game_id;
+        this.gameId = gameId;
         this.status = status;
-        this.system_message_id = system_message_id;
-        this.last_message_id = last_message_id;
-        this.created_at = created_at;
+        this.systemMessageId = systemMessageId;
+        this.lastMessageId = lastMessageId;
+        this.createdAt = createdAt;
     }
 }
 
