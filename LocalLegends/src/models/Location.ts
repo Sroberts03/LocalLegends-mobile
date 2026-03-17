@@ -1,4 +1,4 @@
-export class Location {
+export default class Location {
     id: number;
     googlePlaceId: string;
     name: string;

@@ -1,4 +1,4 @@
-export default class Sports {
+export default class Sport {
     id: number;
     name: string;
     category: SportCategory;

@@ -1,7 +1,7 @@
 export default class Game {
     id: number;
     sportId: number;
-    creatorId: number;
+    creatorId: string;
     locationId: number;
     name: string;
     description: string;
@@ -18,7 +18,7 @@ export default class Game {
     constructor(
         id: number, 
         sportId: number, 
-        creatorId: number, 
+        creatorId: string, 
         locationId: number, 
         name: string, description: 
         string, maxPlayers: number, 
@@ -69,4 +69,26 @@ export enum GenderPreference {
     AllFemale = 'all female',
     Coed = 'coed',
     NoPreference = 'no preference'
+}
+
+export interface GameFilter {
+    sportId?: number;
+    skillLevel?: SkillLevel;
+    genderPreference?: GenderPreference;
+    // distance and location-based filters
+    latitude: number;
+    longitude: number;
+    maxDistance: number;
+    //
+    favoritesOnly?: boolean;
+    happeningTodayOnly?: boolean;
+}
+
+export interface GameWithDetails {
+    game: Game;
+    sportName: string;
+    creatorName: string;
+    locationName: string;
+    latitude: number;
+    longitude: number;
 }

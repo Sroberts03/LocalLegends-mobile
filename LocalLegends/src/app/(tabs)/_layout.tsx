@@ -19,10 +19,6 @@ export default function TabLayout() {
           shadowRadius: 3.84,
           elevation: 5,
       },
-      tabBarItemStyle: {
-        alignItems: 'center',
-        justifyContent: 'center',
-      },
       tabBarActiveTintColor: '#6366f1',
       tabBarInactiveTintColor: '#94a3b8',
       headerShown: false 
@@ -30,8 +26,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <Ionicons name="home" size={28} color={color} />,
+          title: 'Play',
+          tabBarIcon: ({ color }) => <Ionicons name="basketball" size={28} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="myGames"
+        options={{
+          title: 'My Games',
+          tabBarIcon: ({ color }) => <Ionicons name="calendar" size={28} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -39,6 +42,20 @@ export default function TabLayout() {
         options={{
           title: 'Search',
           tabBarIcon: ({ color }) => <Ionicons name="search" size={28} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="groups"
+        options={{
+          title: 'Groups',
+          tabBarIcon: ({ color }) => <Ionicons name="people" size={28} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <Ionicons name="person" size={28} color={color} />,
         }}
       />
     </Tabs>

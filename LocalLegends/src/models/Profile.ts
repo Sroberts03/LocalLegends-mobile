@@ -1,4 +1,4 @@
-export class Profile {
+export default class Profile {
     id: string;
     displayName: string;
     status: ProfileStatus;
