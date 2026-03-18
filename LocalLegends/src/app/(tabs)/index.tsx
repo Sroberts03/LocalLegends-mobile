@@ -110,6 +110,8 @@ export default function MapScreen() {
       <MapView
         style={StyleSheet.absoluteFillObject}
         showsUserLocation
+        showsPointsOfInterest={false}
+        poiEnabled={false}
         ref={mapRef}
         initialRegion={mapRegion}
       >
