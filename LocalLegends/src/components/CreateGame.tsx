@@ -64,6 +64,8 @@ const getAddressComponent = (
 };
 
 export default function CreateGame({ visible, onClose, setGameCreation, sports }: CreateGameProps) {
+  const getDefaultEndTime = () => new Date(Date.now() + 60 * 60 * 1000);
+
   const [sportId, setSportId] = useState<number>(0);
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [isSearchingPlaces, setIsSearchingPlaces] = useState<boolean>(false);
@@ -272,6 +274,41 @@ export default function CreateGame({ visible, onClose, setGameCreation, sports }
   const onStartPickerDismiss = () => setShowStartPicker(false);
   const onEndPickerDismiss = () => setShowEndPicker(false);
 
+  const resetForm = () => {
+    setSportId(0);
+    setPredictions([]);
+    setIsSearchingPlaces(false);
+    setIsFetchingPlaceDetails(false);
+    setPlacesError(null);
+    setGooglePlaceId('');
+    setGameName('');
+    setGameDescription('');
+    setStreetAddress('');
+    setCity('');
+    setState('');
+    setZipCode('');
+    setCountry('');
+    setLatitude(0);
+    setLongitude(0);
+    setLocationName('');
+    setLocationDescription('');
+    setMaxPlayers(10);
+    setMinPlayers(2);
+    setStartTime(new Date());
+    setEndTime(getDefaultEndTime());
+    setShowStartPicker(false);
+    setShowEndPicker(false);
+    setIsRecurring(false);
+    setSkillLevel(SkillLevel.Beginner);
+    setGenderPreference(GenderPreference.NoPreference);
+    skipStreetAutocomplete.current = false;
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   const buildPayload = (status: GameStatus): GameCreation => {
     return {
       sportId,
@@ -327,21 +364,21 @@ export default function CreateGame({ visible, onClose, setGameCreation, sports }
     }
 
     setGameCreation?.(payload);
-    onClose();
+    handleClose();
   };
 
   const handleSaveDraft = () => {
     const payload = buildPayload(GameStatus.Draft);
     setGameCreation?.(payload);
-    onClose();
+    handleClose();
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <View style={styles.backdrop}>
-        <Pressable style={styles.backdropTapTarget} onPress={onClose} />
+        <Pressable style={styles.backdropTapTarget} onPress={handleClose} />
         <View style={styles.sheet}>
-          <Pressable style={styles.closeButton} onPress={onClose} hitSlop={10}>
+          <Pressable style={styles.closeButton} onPress={handleClose} hitSlop={10}>
             <Ionicons name="close" size={24} color="#334155" />
           </Pressable>
 
