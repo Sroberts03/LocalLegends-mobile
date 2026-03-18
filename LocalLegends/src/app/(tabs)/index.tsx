@@ -1,4 +1,4 @@
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker }from 'react-native-maps';
 import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -7,12 +7,53 @@ import { Ionicons } from '@expo/vector-icons';
 import { GameFilter, GameWithDetails } from '@/src/models/Game';
 import MockGameFacade from '@/src/server/mock/MockGameFacade';
 
+const DEFAULT_REGION = {
+  latitude: 37.7749,
+  longitude: -122.4194,
+  latitudeDelta: 0.05,
+  longitudeDelta: 0.05,
+};
+
+const getMarkerColor = (sportName: string) => {
+  switch (sportName.toLowerCase()) {
+    case 'basketball':
+      return '#f97316';
+    case 'soccer':
+      return '#22c55e';
+    case 'american football':
+      return '#3b82f6';
+    default:
+      return '#8b5cf6';
+  }
+};
+
+const getSportIcon = (sportName: string) => {
+  switch (sportName.toLowerCase()) {
+    case 'basketball':
+      return 'basketball-outline';
+    case 'soccer':
+      return 'football-outline';
+    case 'american football':
+      return 'american-football-outline';
+    default:
+      return 'location-outline';
+  }
+};
+
 export default function MapScreen() {
   const server = React.useMemo(() => new MockGameFacade(), []);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const mapRef = React.useRef<MapView>(null);
+  const mapRef = React.useRef<any>(null);
   const [games, setGames] = useState<GameWithDetails[]>([]);
   const [filters, setFilters] = useState<GameFilter>({ latitude: 0, longitude: 0, maxDistance: 0 });
+  const mapRegion = location
+    ? {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      }
+    : DEFAULT_REGION;
 
   const refreshLocation = async () => {
     let loc = await Location.getCurrentPositionAsync({});
@@ -64,24 +105,23 @@ export default function MapScreen() {
         style={StyleSheet.absoluteFillObject}
         showsUserLocation
         ref={mapRef}
-        region={
-          location
-            ? {
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.05,
-              }
-            : undefined
-        } 
+        initialRegion={mapRegion}
       >
-        {games.map((game) => (
+        {games.map(game => (
           <Marker
             key={game.game.id}
             coordinate={{ latitude: game.latitude, longitude: game.longitude }}
             title={game.game.name}
             description={game.locationName}
-          />
+          anchor={{ x: 0.5, y: 1 }}
+        >
+          <View style={styles.markerWrap}>
+            <View style={[styles.markerHead, { backgroundColor: getMarkerColor(game.sportName) }]}>
+              <Ionicons name={getSportIcon(game.sportName)} size={16} color="#ffffff" />
+            </View>
+            <View style={[styles.markerTip, { borderTopColor: getMarkerColor(game.sportName) }]} />
+          </View>
+        </Marker>
         ))}
       </MapView>
 
@@ -143,5 +183,32 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
     borderRadius: 999,
+  },
+  markerWrap: {
+    alignItems: 'center',
+  },
+  markerHead: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  markerTip: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 7,
+    borderRightWidth: 7,
+    borderTopWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    marginTop: -1,
   },
 });
