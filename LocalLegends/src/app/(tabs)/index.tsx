@@ -5,7 +5,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { GameFilter, GameWithDetails } from '@/src/models/Game';
+import Sport from '@/src/models/Sport';
 import MockGameFacade from '@/src/server/mock/MockGameFacade';
+import FilterModal from '@/src/components/FilterModal';
 
 const DEFAULT_REGION = {
   latitude: 37.7749,
@@ -46,6 +48,8 @@ export default function MapScreen() {
   const mapRef = React.useRef<any>(null);
   const [games, setGames] = useState<GameWithDetails[]>([]);
   const [filters, setFilters] = useState<GameFilter>({ latitude: 0, longitude: 0, maxDistance: 0 });
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [sports, setSports] = useState<Sport[]>([]);
   const mapRegion = location
     ? {
         latitude: location.coords.latitude,
@@ -85,14 +89,16 @@ export default function MapScreen() {
   useEffect(() => {
     let isMounted = true;
 
-    const loadGames = async () => {
+    const loadData = async () => {
       const serverGames = await server.listGames(filters);
+      const serverSports = await server.getSports();
       if (isMounted) {
+        setSports(serverSports);
         setGames(serverGames);
       }
     };
 
-    loadGames();
+    loadData();
 
     return () => {
       isMounted = false;
@@ -126,7 +132,7 @@ export default function MapScreen() {
       </MapView>
 
       <View style={styles.actionPillar}>
-        <Pressable onPress={() => alert('Filter legends')}>
+        <Pressable onPress={() => setFiltersVisible(true)}>
           <BlurView intensity={65} tint="light" style={styles.glassActionButton}>
             <Ionicons name="options-outline" color="#111827" size={22} />
           </BlurView>
@@ -142,6 +148,17 @@ export default function MapScreen() {
       <Pressable style={styles.newGameButton} onPress={() => alert('Add new legend')}>
         <Ionicons name="add" color="#fff" size={24} />
       </Pressable>
+
+      <FilterModal
+        visible={filtersVisible}
+        filters={filters}
+        onClose={() => setFiltersVisible(false)}
+        onApply={(updates) => {
+          setFilters((prev) => ({ ...prev, ...updates }));
+          setFiltersVisible(false);
+        }}
+        sports={sports}
+      />
     </View>
   );
 }

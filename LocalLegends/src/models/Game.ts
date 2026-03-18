@@ -72,9 +72,9 @@ export enum GenderPreference {
 }
 
 export interface GameFilter {
-    sportId?: number;
-    skillLevel?: SkillLevel;
-    genderPreference?: GenderPreference;
+    sportIds?: number[];
+    skillLevels?: SkillLevel[];
+    genderPreferences?: GenderPreference[];
     // distance and location-based filters
     latitude: number;
     longitude: number;

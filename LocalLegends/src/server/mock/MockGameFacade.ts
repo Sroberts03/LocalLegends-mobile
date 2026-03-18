@@ -5,7 +5,7 @@ import MockDataStore from "./MockDataStore";
 export default class MockGameFacade implements IGameFacade {
     calculateDistance(gameLocation: { latitude: number; longitude: number }, userLocation: { latitude: number; longitude: number }): number {
         const toRad = (value: number) => (value * Math.PI) / 180;
-        const R = 6371;
+        const R = 3958.8;
         const dLat = toRad(gameLocation.latitude - userLocation.latitude);
         const dLon = toRad(gameLocation.longitude - userLocation.longitude);
         const lat1 = toRad(userLocation.latitude);
@@ -26,14 +26,14 @@ export default class MockGameFacade implements IGameFacade {
         const currentUserId = MockDataStore.currentUserId;
         const userGameIds = MockDataStore.userGames.get(currentUserId) || [];
 
-        if (filter.sportId) {
-            games = games.filter(g => g.sportId === filter.sportId);
+        if (filter.sportIds && filter.sportIds.length > 0) {
+            games = games.filter(g => filter.sportIds!.includes(g.sportId));
         }
-        if (filter.skillLevel) {
-            games = games.filter(g => g.skillLevel === filter.skillLevel);
+        if (filter.skillLevels && filter.skillLevels.length > 0) {
+            games = games.filter(g => filter.skillLevels!.includes(g.skillLevel));
         }
-        if (filter.genderPreference) {
-            games = games.filter(g => g.genderPreference === filter.genderPreference);
+        if (filter.genderPreferences && filter.genderPreferences.length > 0) {
+            games = games.filter(g => filter.genderPreferences!.includes(g.genderPreference));
         }
         if (filter.happeningTodayOnly) {
             const today = new Date();
@@ -60,5 +60,9 @@ export default class MockGameFacade implements IGameFacade {
                 longitude: location.longitude
             };
         }));
+    }
+
+    async getSports() {
+        return Promise.resolve(Array.from(MockDataStore.Sports.values()));
     }
 }
