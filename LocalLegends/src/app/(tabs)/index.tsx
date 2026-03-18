@@ -4,10 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { GameFilter, GameWithDetails } from '@/src/models/Game';
+import { GameCreation, GameFilter, GameWithDetails } from '@/src/models/Game';
 import Sport from '@/src/models/Sport';
 import MockGameFacade from '@/src/server/mock/MockGameFacade';
 import FilterModal from '@/src/components/FilterModal';
+import CreateGame from '@/src/components/CreateGame';
 
 const DEFAULT_REGION = {
   latitude: 37.7749,
@@ -49,6 +50,8 @@ export default function MapScreen() {
   const [games, setGames] = useState<GameWithDetails[]>([]);
   const [filters, setFilters] = useState<GameFilter>({ latitude: 0, longitude: 0, maxDistance: 0 });
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [createGameVisible, setCreateGameVisible] = useState(false);
+  const [, setGameCreation] = useState<GameCreation | null>(null);
   const [sports, setSports] = useState<Sport[]>([]);
   const mapRegion = location
     ? {
@@ -147,7 +150,7 @@ export default function MapScreen() {
         </Pressable>
       </View>
 
-      <Pressable style={styles.newGameButton} onPress={() => alert('Add new legend')}>
+      <Pressable style={styles.newGameButton} onPress={() => setCreateGameVisible(true)}>
         <Ionicons name="add" color="#fff" size={24} />
       </Pressable>
 
@@ -158,6 +161,15 @@ export default function MapScreen() {
         onApply={(updates) => {
           setFilters((prev) => ({ ...prev, ...updates }));
           setFiltersVisible(false);
+        }}
+        sports={sports}
+      />
+
+      <CreateGame
+        visible={createGameVisible}
+        onClose={() => setCreateGameVisible(false)}
+        setGameCreation={(gameCreation) => {
+          setGameCreation(gameCreation);
         }}
         sports={sports}
       />

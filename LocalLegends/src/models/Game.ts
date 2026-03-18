@@ -49,6 +49,30 @@ export default class Game {
     }
 }
 
+export class GameCreation {
+    sportId?: number;
+    googlePlaceId?: string;
+    gameName?: string;
+    gameDescription?: string;
+    streetAddress?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+    latitude?: number;
+    longitude?: number;
+    locationName?: string;
+    locationDescription?: string;
+    maxPlayers?: number;
+    minPlayers?: number;
+    startTime?: Date;
+    endTime?: Date;
+    status?: GameStatus;
+    isRecurring?: boolean;
+    skillLevel?: SkillLevel;
+    genderPreference?: GenderPreference;
+}
+
 export enum GameStatus {
     Draft = 'draft',
     Active = 'active',
