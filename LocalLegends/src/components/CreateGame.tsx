@@ -14,7 +14,7 @@ import {
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import DateTimePicker, { DateTimePickerChangeEvent } from '@react-native-community/datetimepicker';
-import { GameCreation, GameStatus, GenderPreference, SkillLevel } from '@/src/models/Game';
+import { GameCreation, GameStatus, GenderPreference, SkillLevel, AccessType } from '@/src/models/Game';
 import Sport from '@/src/models/Sport';
 
 type CreateGameProps = {
@@ -92,6 +92,7 @@ export default function CreateGame({ visible, onClose, sports, handleGameCreatio
   const [isRecurring, setIsRecurring] = useState<boolean>(false);
   const [skillLevel, setSkillLevel] = useState<SkillLevel>(SkillLevel.Beginner);
   const [genderPreference, setGenderPreference] = useState<GenderPreference>(GenderPreference.NoPreference);
+  const [accessType, setAccessType] = useState<AccessType>(AccessType.Public);
   const skipStreetAutocomplete = useRef<boolean>(false);
 
   // 2. Sync Props to State whenever existingGame or visible changes
@@ -119,6 +120,7 @@ export default function CreateGame({ visible, onClose, sports, handleGameCreatio
       setIsRecurring(existingGame.isRecurring || false);
       setSkillLevel(existingGame.skillLevel || SkillLevel.Beginner);
       setGenderPreference(existingGame.genderPreference || GenderPreference.NoPreference);
+      setAccessType(existingGame.accessType || AccessType.Public);
     } else if (visible && !existingGame) {
       resetForm();
     }
@@ -126,7 +128,7 @@ export default function CreateGame({ visible, onClose, sports, handleGameCreatio
 
   const skillOptions = useMemo(() => Object.values(SkillLevel), []);
   const genderOptions = useMemo(() => Object.values(GenderPreference), []);
-
+  const accessOptions = useMemo(() => Object.values(AccessType), []);
   // Places Autocomplete Effect
   useEffect(() => {
     if (!visible) {
@@ -237,6 +239,7 @@ export default function CreateGame({ visible, onClose, sports, handleGameCreatio
     setGenderPreference(GenderPreference.NoPreference);
     setIsRecurring(false);
     setGooglePlaceId('');
+    setAccessType(AccessType.Public);
   };
 
   const buildPayload = (status: GameStatus): GameCreation => ({
@@ -262,6 +265,7 @@ export default function CreateGame({ visible, onClose, sports, handleGameCreatio
     isRecurring,
     skillLevel,
     genderPreference,
+    accessType,
   });
 
   const handleCreate = () => {
@@ -363,6 +367,9 @@ export default function CreateGame({ visible, onClose, sports, handleGameCreatio
 
             <Text style={styles.choiceLabel}>Gender Preference *</Text>
             <ChoiceGroup options={genderOptions} value={genderPreference} onChange={setGenderPreference} />
+
+            <Text style={styles.choiceLabel}>Access Type *</Text>
+            <ChoiceGroup options={accessOptions} value={accessType} onChange={setAccessType} />
           </ScrollView>
 
           <View style={styles.buttonRow}>

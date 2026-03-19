@@ -104,7 +104,7 @@ export default function GameDetailsModal({ game, onClose, onJoinOrLeave }: GameD
             </View>
 
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Location</Text>
+                <Text style={styles.sectionTitle}>{toTitleCase(game.game.accessType)} Location</Text>
                 <Text style={styles.scheduleText}>{game.locationName}</Text>
             </View>
 

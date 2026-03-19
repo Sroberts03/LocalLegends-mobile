@@ -14,14 +14,16 @@ export default class Game {
     skillLevel: SkillLevel;
     genderPreference: GenderPreference;
     currentPlayerCount: number;
+    accessType: AccessType;
 
     constructor(
         id: number, 
         sportId: number, 
         creatorId: string, 
         locationId: number, 
-        name: string, description: 
-        string, maxPlayers: number, 
+        name: string, 
+        description: string, 
+        maxPlayers: number, 
         minPlayers: number, 
         status: GameStatus, 
         startTime: Date, 
@@ -29,7 +31,8 @@ export default class Game {
         isRecurring: boolean, 
         skillLevel: SkillLevel, 
         genderPreference: GenderPreference, 
-        currentPlayerCount: number
+        currentPlayerCount: number,
+        accessType: AccessType
     ) {
         this.id = id;
         this.sportId = sportId;
@@ -46,6 +49,7 @@ export default class Game {
         this.skillLevel = skillLevel;
         this.genderPreference = genderPreference;
         this.currentPlayerCount = currentPlayerCount;
+        this.accessType = accessType;
     }
 }
 
@@ -72,6 +76,7 @@ export class GameCreation {
     isRecurring?: boolean;
     skillLevel?: SkillLevel;
     genderPreference?: GenderPreference;
+    accessType?: AccessType;
     
     constructor(
         status: GameStatus,
@@ -94,7 +99,8 @@ export class GameCreation {
         endTime?: Date,  
         isRecurring?: boolean,
         skillLevel?: SkillLevel,
-        genderPreference?: GenderPreference
+        genderPreference?: GenderPreference,
+        accessType?: AccessType
     ) {
         this.status = status;
         this.sportId = sportId;
@@ -117,6 +123,7 @@ export class GameCreation {
         this.isRecurring = isRecurring;
         this.skillLevel = skillLevel;
         this.genderPreference = genderPreference;
+        this.accessType = accessType;
     }
 }
 
@@ -125,7 +132,7 @@ export enum GameStatus {
     Active = 'active',
     Finished = 'finished',
     Coordination = 'coordination',
-    Canceled = 'canceled'
+    Cancelled = 'cancelled'
 }
 
 export enum SkillLevel {
@@ -133,6 +140,11 @@ export enum SkillLevel {
     Intermediate = 'intermediate',
     Advanced = 'advanced',
     All = 'all'
+}
+
+export enum AccessType {
+    Public = 'public',
+    Private = 'private'
 }
 
 export enum GenderPreference {

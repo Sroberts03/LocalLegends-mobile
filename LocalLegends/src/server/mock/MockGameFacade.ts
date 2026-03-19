@@ -1,4 +1,4 @@
-import Game, { GameCreation, GameFilter, GameWithDetails, SkillLevel, GenderPreference } from "@/src/models/Game";
+import Game, { GameCreation, GameFilter, GameWithDetails, SkillLevel, GenderPreference, AccessType, GameStatus } from "@/src/models/Game";
 import IGameFacade from "../facades/GameFacade";
 import MockDataStore from "./MockDataStore";
 
@@ -119,7 +119,8 @@ export default class MockGameFacade implements IGameFacade {
             isRecurring: gameData.isRecurring || false,
             skillLevel: gameData.skillLevel || SkillLevel.All,
             genderPreference: gameData.genderPreference || GenderPreference.NoPreference,
-            currentPlayerCount: 1
+            currentPlayerCount: 1,
+            accessType: gameData.accessType || AccessType.Public
         };
         MockDataStore.Games.set(newGameId, newGame);
         MockDataStore.userGames.set(currentUserId, [...(MockDataStore.userGames.get(currentUserId) || []), newGameId]);
@@ -223,6 +224,15 @@ export default class MockGameFacade implements IGameFacade {
         }
         game.currentPlayerCount -= 1;
         MockDataStore.userGames.set(currentUserId, userGameIds.filter(id => id !== gameId));
+        if (game.currentPlayerCount === 0) {
+            MockDataStore.Games.set(gameId, { ...game, status: GameStatus.Cancelled });
+        }
+        if (game.accessType === AccessType.Private && MockDataStore.currentUserId === game.creatorId) {
+            MockDataStore.Games.set(gameId, { ...game, status: GameStatus.Cancelled });
+        }
+        if (game.creatorId === currentUserId) { 
+            MockDataStore.Games.set(gameId, { ...game, creatorId: MockDataStore.userGames});
+        }
     }
 
     async deleteGame(gameId: number): Promise<void> {
