@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: 100,
-    backgroundColor: 'rgba(30, 41, 59, 0.38)', // darker overlay for more contrast
+    backgroundColor: 'rgba(30, 41, 59, 0.38)', 
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -286,11 +286,10 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 12,
   },
-  // Removed loadingSpinner style, ActivityIndicator handles animation
   loadingText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1e293b', // darker text for contrast
+    color: '#1e293b',
     marginTop: 8,
     textShadowColor: 'rgba(255,255,255,0.18)',
     textShadowOffset: { width: 0, height: 2 },
