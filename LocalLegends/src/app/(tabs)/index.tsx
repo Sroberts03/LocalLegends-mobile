@@ -9,6 +9,7 @@ import Sport from '@/src/models/Sport';
 import MockGameFacade from '@/src/server/mock/MockGameFacade';
 import FilterModal from '@/src/components/FilterModal';
 import CreateGame from '@/src/components/CreateGame';
+import GameDetailsModal from '@/src/components/GameDetailsModal';
 
 const DEFAULT_REGION = {
   latitude: 37.7749,
@@ -52,6 +53,8 @@ export default function MapScreen() {
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [createGameVisible, setCreateGameVisible] = useState(false);
   const [sports, setSports] = useState<Sport[]>([]);
+  const [gameToCheckout, setGameToCheckout] = useState<GameWithDetails | null>(null);
+
   const mapRegion = location
     ? {
         latitude: location.coords.latitude,
@@ -111,6 +114,13 @@ export default function MapScreen() {
     await server.createGame(gameCreation);
   }
 
+  const dateFormatter = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  });
+
   return (
     <View style={styles.container}>
       <MapView
@@ -126,8 +136,9 @@ export default function MapScreen() {
             key={game.game.id}
             coordinate={{ latitude: game.latitude, longitude: game.longitude }}
             title={game.game.name}
-            description={game.locationName}
-          anchor={{ x: 0.5, y: 1 }}
+            description={game.locationName + ' - ' + dateFormatter.format(game.game.startTime)}
+            anchor={{ x: 0.5, y: 1 }}
+            onCalloutPress={() => setGameToCheckout(game)}
         >
           <View style={styles.markerWrap}>
             <View style={[styles.markerHead, { backgroundColor: getMarkerColor(game.sportName) }]}>
@@ -173,6 +184,11 @@ export default function MapScreen() {
         onClose={() => setCreateGameVisible(false)}
         sports={sports}
         handleGameCreation={handleGameCreation}
+      />
+
+      <GameDetailsModal
+        game={gameToCheckout}
+        onClose={() => setGameToCheckout(null)}
       />
     </View>
   );
