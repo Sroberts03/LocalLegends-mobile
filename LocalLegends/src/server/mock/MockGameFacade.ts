@@ -224,4 +224,20 @@ export default class MockGameFacade implements IGameFacade {
         game.currentPlayerCount -= 1;
         MockDataStore.userGames.set(currentUserId, userGameIds.filter(id => id !== gameId));
     }
+
+    async deleteGame(gameId: number): Promise<void> {
+        const game = MockDataStore.Games.get(gameId);
+        if (!game) {
+            throw new Error("Game not found");
+        }
+        if (game.creatorId !== MockDataStore.currentUserId) {
+            throw new Error("Only the creator can delete the game");
+        }
+        MockDataStore.Games.delete(gameId);
+        for (const [userId, gameIds] of MockDataStore.userGames.entries()) {
+            if (gameIds.includes(gameId)) {
+                MockDataStore.userGames.set(userId, gameIds.filter(id => id !== gameId));
+            }
+        }
+    }
 }

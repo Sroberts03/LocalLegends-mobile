@@ -64,7 +64,6 @@ const getAddressComponent = (
 };
 
 export default function CreateGame({ visible, onClose, sports, handleGameCreation, existingGame }: CreateGameProps) {
-  console.log("CreateGame component mounted with", existingGame );
   // 1. Initial State Declarations
   const [gameId, setGameId] = useState<number>(0);
   const [sportId, setSportId] = useState<number>(0);

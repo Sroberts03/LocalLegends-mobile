@@ -6,6 +6,7 @@ import { GameWithDetails } from "../models/Game";
 type GameCardProps = {
   game: GameWithDetails | GameCreation;
   onPress: () => void;
+  handleDeleteDraft?: (gameId: number) => void;
 };
 
 const sportIcon = (sportName: string) => {
@@ -48,17 +49,33 @@ const formatGameTime = (startTime: Date | undefined) => {
   return `${month} ${date.getDate()}, ${date.toLocaleTimeString([], options)}`;
 };
 
-export default function GameCard({ game, onPress }: GameCardProps) {
+export default function GameCard({ game, onPress, handleDeleteDraft }: GameCardProps) {
   return (
     <Pressable onPress={onPress} style={styles.card}>
-      <View style={styles.row}>
+      <View style={styles.cardContent}>
+        {/* Left Side: Info */}
         <View style={styles.info}>
           <Text style={styles.gameName}>{game.game?.name || game.gameName}</Text>
           <Text style={styles.sportName}>{game.sportName}</Text>
-          <Text style={styles.locationName}>{game.locationName || game.location?.name}</Text>
           <Text style={styles.startTime}>{formatGameTime(game.game?.startTime || game.startTime)}</Text>
         </View>
-        <Ionicons name={sportIcon(game?.sportName)} size={40} color="#6366f1" style={styles.icon} />
+
+        {/* Right Side: Actions & Icon */}
+        <View style={styles.rightPillar}>
+          {handleDeleteDraft && (
+            <Pressable 
+              onPress={() => handleDeleteDraft(game.game?.id || game.id)} 
+              style={styles.deleteCircle}
+            >
+              <Ionicons name="trash-outline" size={18} color="#ef4444" />
+            </Pressable>
+          )}
+          <Ionicons 
+            name={sportIcon(game?.sportName)} 
+            size={32} 
+            color="#6366f1" 
+          />
+        </View>
       </View>
     </Pressable>
   );
@@ -67,43 +84,50 @@ export default function GameCard({ game, onPress }: GameCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 16, // Softer corners
     padding: 16,
     marginVertical: 8,
     width: '100%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
     elevation: 3,
   },
-  row: {
+  cardContent: {
     flexDirection: 'row',
-    alignItems: 'center',
-  },
-  icon: {
-    marginLeft: 16,
+    justifyContent: 'space-between',
+    alignItems: 'center', // Vertically centers everything in the row
   },
   info: {
     flex: 1,
+    gap: 2, // Consistent spacing between lines
+  },
+  rightPillar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12, // Spaces the trash can and sport icon
+  },
+  deleteCircle: {
+    backgroundColor: '#fee2e2',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   gameName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1e293b',
   },
   sportName: {
     fontSize: 14,
-    color: '#555',
-    marginBottom: 2,
-  },
-  locationName: {
-    fontSize: 14,
-    color: '#555',
-    marginBottom: 2,
+    color: '#64748b',
   },
   startTime: {
     fontSize: 12,
-    color: '#777',
+    color: '#94a3b8',
+    marginTop: 4,
   },
 });

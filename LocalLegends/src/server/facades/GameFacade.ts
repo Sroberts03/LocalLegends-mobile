@@ -10,4 +10,5 @@ export default interface IGameFacade {
   listMyActiveGames(): Promise<GameWithDetails[]>;
   listMyDraftGames(): Promise<GameCreation[]>;
   leaveGame(gameId: number): Promise<void>;
+  deleteGame(gameId: number): Promise<void>;
 }

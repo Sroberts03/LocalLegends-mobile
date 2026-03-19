@@ -75,6 +75,16 @@ export default function MyGamesScreen() {
     loadMyGames();
   }
 
+  const handleDeleteDraft = async (gameId: number) => {
+    try {
+      await server.deleteGame(gameId);
+      loadMyGames();
+      setGameCreation(null);
+    } catch (error) {
+      console.error("Failed to delete draft:", error);
+    }
+  }
+
   return (
     <View style={styles.container}>
       {/* Tab Header Area */}
@@ -110,6 +120,7 @@ export default function MyGamesScreen() {
                 key={cardId(game)} 
                 game={game} 
                 onPress={() => handleGamePress(game)} 
+                handleDeleteDraft={handleDeleteDraft}
               />
             ))
           ) : (
