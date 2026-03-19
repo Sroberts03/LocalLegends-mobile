@@ -1,7 +1,7 @@
 import MapView, { Marker }from 'react-native-maps';
 import * as Location from 'expo-location';
 import React, { useEffect, useState, useCallback } from 'react';
-import { Pressable, StyleSheet, View, Text } from 'react-native';
+import { Pressable, StyleSheet, View, Text, ActivityIndicator, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { GameCreation, GameFilter, GameWithDetails } from '@/src/models/Game';
@@ -44,6 +44,18 @@ const getSportIcon = (sportName: string) => {
   }
 };
 
+const lastUpdatedDate = (lastUpdated: Date | null, now: Date) => {
+    if (!lastUpdated) return "Never";
+    const diffMs = now.getTime() - lastUpdated.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+};
+
 export default function MapScreen() {
   const server = React.useMemo(() => new MockGameFacade(), []);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -55,6 +67,31 @@ export default function MapScreen() {
   const [sports, setSports] = useState<Sport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [gameToCheckout, setGameToCheckout] = useState<GameWithDetails | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [now, setNow] = useState(new Date());
+  const [showLastUpdated, setShowLastUpdated] = useState(false);
+  const pillOpacity = React.useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Show pill and auto-hide after refresh
+  useEffect(() => {
+    if (lastUpdated) {
+      setShowLastUpdated(true);
+      pillOpacity.setValue(1);
+      const timeout = setTimeout(() => {
+        Animated.timing(pillOpacity, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }).start(() => setShowLastUpdated(false));
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [lastUpdated, pillOpacity]);
 
   const mapRegion = location
     ? {
@@ -99,6 +136,7 @@ export default function MapScreen() {
       const serverSports = await server.getSports();
       setSports(serverSports);
       setGames(serverGames);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error("Failed to refresh games:", error);
     } finally {
@@ -159,11 +197,19 @@ export default function MapScreen() {
 
       {isLoading && (
         <View style={styles.loadingOverlay}>
-          <BlurView intensity={80} tint="light" style={styles.loadingBlur}>
-            <Ionicons name="refresh" size={32} color="#6366f1" style={{ marginBottom: 8 }} />
+          <View style={styles.loadingSpinnerContainer}>
+            <ActivityIndicator size="large" color="#6366f1" style={{ marginBottom: 16 }} />
             <Text style={styles.loadingText}>Loading...</Text>
-          </BlurView>
+          </View>
         </View>
+      )}
+
+      {showLastUpdated && (
+        <Animated.View style={[styles.lastUpdatedContainer, { opacity: pillOpacity }]}> 
+          <Text style={styles.lastUpdatedText}>
+            Last Updated: {lastUpdatedDate(lastUpdated, now)}
+          </Text>
+        </Animated.View>
       )}
 
       <View style={styles.actionPillar}>
@@ -219,28 +265,36 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   loadingOverlay: {
     position: 'absolute',
-    top: 60, 
+    top: 0,
     left: 0,
     right: 0,
-    radius: 999,
+    bottom: 0,
+    zIndex: 100,
+    backgroundColor: 'rgba(30, 41, 59, 0.38)', // darker overlay for more contrast
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingSpinnerContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 100,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 24,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 12,
   },
-  loadingBlur: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 999, 
-    flexDirection: 'row', 
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.4)',
-  },
+  // Removed loadingSpinner style, ActivityIndicator handles animation
   loadingText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4b5563',
-    marginLeft: 8,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1e293b', // darker text for contrast
+    marginTop: 8,
+    textShadowColor: 'rgba(255,255,255,0.18)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   container: {
     flex: 1,
@@ -305,5 +359,24 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     marginTop: -1,
+  },
+  lastUpdatedContainer: {
+    position: 'absolute',
+    left: 16,
+    top: 70,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  lastUpdatedText: {
+    fontSize: 14,
+    color: '#111827',
+    fontWeight: '500',
   },
 });
