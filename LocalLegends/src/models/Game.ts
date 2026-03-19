@@ -67,10 +67,56 @@ export class GameCreation {
     minPlayers?: number;
     startTime?: Date;
     endTime?: Date;
-    status?: GameStatus;
+    status: GameStatus;
     isRecurring?: boolean;
     skillLevel?: SkillLevel;
     genderPreference?: GenderPreference;
+    
+    constructor(
+        status: GameStatus,
+        sportId?: number, 
+        googlePlaceId?: string, 
+        gameName?: string, 
+        gameDescription?: string, 
+        streetAddress?: string, 
+        city?: string, 
+        state?: string, 
+        zipCode?: string, 
+        country?: string, 
+        latitude?: number, 
+        longitude?: number, 
+        locationName?: string, 
+        locationDescription?: string, 
+        maxPlayers?: number, 
+        minPlayers?: number, 
+        startTime?: Date, 
+        endTime?: Date,  
+        isRecurring?: boolean,
+        skillLevel?: SkillLevel,
+        genderPreference?: GenderPreference
+    ) {
+        this.status = status;
+        this.sportId = sportId;
+        this.googlePlaceId = googlePlaceId;
+        this.gameName = gameName;
+        this.gameDescription = gameDescription;
+        this.streetAddress = streetAddress;
+        this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+        this.country = country;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.locationName = locationName;
+        this.locationDescription = locationDescription;
+        this.maxPlayers = maxPlayers;
+        this.minPlayers = minPlayers;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.isRecurring = isRecurring;
+        this.skillLevel = skillLevel;
+        this.genderPreference = genderPreference;
+    }
 }
 
 export enum GameStatus {

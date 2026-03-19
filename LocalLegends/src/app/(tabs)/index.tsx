@@ -51,7 +51,6 @@ export default function MapScreen() {
   const [filters, setFilters] = useState<GameFilter>({ latitude: 0, longitude: 0, maxDistance: 0 });
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [createGameVisible, setCreateGameVisible] = useState(false);
-  const [, setGameCreation] = useState<GameCreation | null>(null);
   const [sports, setSports] = useState<Sport[]>([]);
   const mapRegion = location
     ? {
@@ -108,13 +107,17 @@ export default function MapScreen() {
     };
   }, [filters, server]);
 
+  const handleGameCreation = async (gameCreation: GameCreation) => {
+    await server.createGame(gameCreation);
+  }
+
   return (
     <View style={styles.container}>
       <MapView
         style={StyleSheet.absoluteFillObject}
         showsUserLocation
         showsPointsOfInterest={false}
-        poiEnabled={false}
+        pitchEnabled={false}
         ref={mapRef}
         initialRegion={mapRegion}
       >
@@ -168,10 +171,8 @@ export default function MapScreen() {
       <CreateGame
         visible={createGameVisible}
         onClose={() => setCreateGameVisible(false)}
-        setGameCreation={(gameCreation) => {
-          setGameCreation(gameCreation);
-        }}
         sports={sports}
+        handleGameCreation={handleGameCreation}
       />
     </View>
   );

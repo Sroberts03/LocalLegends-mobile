@@ -1,4 +1,4 @@
-import { GameFilter, GameWithDetails } from "@/src/models/Game";
+import Game, { GameCreation, GameFilter, GameWithDetails, SkillLevel, GenderPreference } from "@/src/models/Game";
 import IGameFacade from "../facades/GameFacade";
 import MockDataStore from "./MockDataStore";
 
@@ -64,5 +64,58 @@ export default class MockGameFacade implements IGameFacade {
 
     async getSports() {
         return Promise.resolve(Array.from(MockDataStore.Sports.values()));
+    }
+
+    async createGame(gameData: GameCreation): Promise<void> {
+        let locationId = 0;
+        const currentUserId = MockDataStore.currentUserId;
+        if (gameData.googlePlaceId) {
+            const locations = Array.from(MockDataStore.Locations.values());
+            for (const loc of locations) {
+                if (loc.googlePlaceId === gameData.googlePlaceId) {
+                    gameData.googlePlaceId = undefined;
+                    locationId = loc.id;
+                    break;
+                }
+            }
+            if (locationId === 0) {
+                locationId = MockDataStore.Locations.size + 1;
+                MockDataStore.Locations.set(locationId, {
+                    id: locationId,
+                    name: gameData.locationName || "Unnamed Location",
+                    description: gameData.gameDescription || "",
+                    streetAddress: gameData.streetAddress || "",
+                    city: gameData.city || "",
+                    state: gameData.state || "",
+                    zipCode: gameData.zipCode || "",
+                    country: gameData.country || "",
+                    latitude: gameData.latitude!,
+                    longitude: gameData.longitude!,
+                    googlePlaceId: gameData.googlePlaceId!
+                });
+            }
+        }
+
+        const newGameId = MockDataStore.Games.size + 1;
+       
+        const newGame: Game = {
+            id: newGameId,
+            creatorId: MockDataStore.currentUserId,
+            sportId: gameData.sportId!,
+            locationId: locationId!,
+            name: gameData.gameName || "Untitled Game",
+            description: gameData.gameDescription || "",
+            maxPlayers: gameData.maxPlayers || 10,
+            minPlayers: gameData.minPlayers || 2,
+            startTime: gameData.startTime || new Date(),
+            endTime: gameData.endTime || new Date(),
+            status: gameData.status || "draft",
+            isRecurring: gameData.isRecurring || false,
+            skillLevel: gameData.skillLevel || SkillLevel.All,
+            genderPreference: gameData.genderPreference || GenderPreference.NoPreference,
+            currentPlayerCount: 1
+        };
+        MockDataStore.Games.set(newGameId, newGame);
+        MockDataStore.userGames.set(currentUserId, [...(MockDataStore.userGames.get(currentUserId) || []), newGameId]);
     }
 }

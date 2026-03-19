@@ -21,8 +21,8 @@ import Sport from '@/src/models/Sport';
 type CreateGameProps = {
   visible: boolean;
   onClose: () => void;
-  setGameCreation?: (gameCreation: GameCreation) => void;
   sports: Sport[];
+  handleGameCreation: (gameCreation: GameCreation) => void;
 };
 
 type PlacePrediction = {
@@ -63,7 +63,7 @@ const getAddressComponent = (
   return useShortName ? match.short_name : match.long_name;
 };
 
-export default function CreateGame({ visible, onClose, setGameCreation, sports }: CreateGameProps) {
+export default function CreateGame({ visible, onClose, sports, handleGameCreation }: CreateGameProps) {
   const getDefaultEndTime = () => new Date(Date.now() + 60 * 60 * 1000);
 
   const [sportId, setSportId] = useState<number>(0);
@@ -358,18 +358,27 @@ export default function CreateGame({ visible, onClose, setGameCreation, sports }
 
     const payload = buildPayload(GameStatus.Active);
 
+    if (!payload.startTime || !payload.endTime) {
+      Alert.alert('Missing date/time', 'Select start and end times for the game.');
+      return;
+    }
+
+    if (payload.startTime <= new Date()) {
+      Alert.alert('Invalid start time', 'Start time must be in the future.');
+      return;
+    }
+
     if (payload.endTime <= payload.startTime) {
       Alert.alert('Invalid date range', 'End time must be after start time.');
       return;
     }
 
-    setGameCreation?.(payload);
     handleClose();
   };
 
   const handleSaveDraft = () => {
     const payload = buildPayload(GameStatus.Draft);
-    setGameCreation?.(payload);
+    handleGameCreation(payload);
     handleClose();
   };
 
