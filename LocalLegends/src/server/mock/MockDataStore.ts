@@ -3,7 +3,6 @@ import Profile, { ProfileStatus } from "@/src/models/Profile";
 import Location from "@/src/models/Location";
 import Sport, { SportCategory, SportStatus } from "@/src/models/Sport";
 
-
 class MockDataStore {
 
     currentUserId = "user1";
@@ -22,23 +21,23 @@ class MockDataStore {
 
     constructor() {
         // Initialize mock user data
-        const user1 = new Profile("user1", "Alice", ProfileStatus.GoodStanding, "https://example.com/profile1.jpg");
-        const user2 = new Profile("user2", "Bob", ProfileStatus.GoodStanding, "https://example.com/profile2.jpg");
-        const user3 = new Profile("user3", "Charlie", ProfileStatus.Banned, "https://example.com/profile3.jpg");
+        const user1 = new Profile("user1", "Alice", ProfileStatus.GoodStanding, "https://i.pravatar.cc/300?u=alice", 2020, "Love playing sports and meeting new people!", 95);
+        const user2 = new Profile("user2", "Bob", ProfileStatus.GoodStanding, "https://i.pravatar.cc/300?u=bob", 2021, "I love playing soccer!", 85);
+        const user3 = new Profile("user3", "Charlie", ProfileStatus.Banned, "https://i.pravatar.cc/300?u=charlie", 2019, "I'm a bit rusty, but I'm up for a challenge!", 75);
         this.Users.set(user1.id, user1);
         this.Users.set(user2.id, user2);
         this.Users.set(user3.id, user3);
 
         //initialize mock game data
-        const game1 = new Game(1, 1, "user1", 1, "Morning Basketball", "Let's play some basketball!", 10, 2, GameStatus.Active, new Date(), new Date(), false, SkillLevel.Intermediate, GenderPreference.NoPreference, 5, AccessType.Public);
-        const game2 = new Game(2, 2, "user2", 2, "Evening Soccer", "Join us for a soccer match!", 22, 4, GameStatus.Active, new Date(), new Date(), false, SkillLevel.Beginner, GenderPreference.Coed, 10, AccessType.Private);
-        const game3 = new Game(3, 3, "user3", 3, "Weekend Football", "Looking for players for football this weekend!", 12, 6, GameStatus.Coordination, new Date(), new Date(), false, SkillLevel.Advanced, GenderPreference.AllMale, 3, AccessType.Public);
+        const game1 = new Game(1, 1, "user1", 1, "Morning Basketball", "Let's play some basketball!", 10, 2, GameStatus.Active, new Date(), new Date(), false, SkillLevel.Intermediate, GenderPreference.NoPreference, 5, AccessType.Public, new Date(), new Date());
+        const game2 = new Game(2, 2, "user2", 2, "Evening Soccer", "Join us for a soccer match!", 22, 4, GameStatus.Active, new Date(), new Date(), false, SkillLevel.Beginner, GenderPreference.Coed, 10, AccessType.Private, new Date(), new Date());
+        const game3 = new Game(3, 3, "user3", 3, "Weekend Football", "Looking for players for football this weekend!", 12, 6, GameStatus.Coordination, new Date(), new Date(), false, SkillLevel.Advanced, GenderPreference.AllMale, 3, AccessType.Public, new Date(), new Date());
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
-        const game4 = new Game(4, 1, "user2", 2, "Afternoon Basketball", "Basketball in the afternoon!", 10, 2, GameStatus.Active, tomorrow, tomorrow, false, SkillLevel.Intermediate, GenderPreference.NoPreference, 5, AccessType.Public);
-        const game5 = new Game(5, 2, "user1", 2, "Morning Soccer", "Soccer in the morning!", 22, 4, GameStatus.Active, tomorrow, tomorrow, false, SkillLevel.Beginner, GenderPreference.Coed, 10, AccessType.Public);
-        const game6 = new Game(6, 3, "user3", 1, "Weekend Football", "Football this weekend!", 12, 6, GameStatus.Coordination, tomorrow, tomorrow, false, SkillLevel.Advanced, GenderPreference.AllMale, 3, AccessType.Public);
-        const game7 = new Game(7, 3, "user3", 1, "Weekend Football", "Football this weekend!", 12, 6, GameStatus.Active, tomorrow, tomorrow, false, SkillLevel.Advanced, GenderPreference.AllMale, 3, AccessType.Private);
+        const game4 = new Game(4, 1, "user2", 2, "Afternoon Basketball", "Basketball in the afternoon!", 10, 2, GameStatus.Active, tomorrow, tomorrow, false, SkillLevel.Intermediate, GenderPreference.NoPreference, 5, AccessType.Public, new Date(), new Date());
+        const game5 = new Game(5, 2, "user1", 2, "Morning Soccer", "Soccer in the morning!", 22, 4, GameStatus.Active, tomorrow, tomorrow, false, SkillLevel.Beginner, GenderPreference.Coed, 10, AccessType.Public, new Date(), new Date());
+        const game6 = new Game(6, 3, "user3", 1, "Weekend Football", "Football this weekend!", 12, 6, GameStatus.Coordination, tomorrow, tomorrow, false, SkillLevel.Advanced, GenderPreference.AllMale, 3, AccessType.Public, new Date(), new Date());
+        const game7 = new Game(7, 3, "user3", 1, "Weekend Football", "Football this weekend!", 12, 6, GameStatus.Active, tomorrow, tomorrow, false, SkillLevel.Advanced, GenderPreference.AllMale, 3, AccessType.Private, new Date(), new Date());
         this.Games.set(game1.id, game1);
         this.Games.set(game2.id, game2);
         this.Games.set(game3.id, game3);

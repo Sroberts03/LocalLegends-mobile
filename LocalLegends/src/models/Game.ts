@@ -15,6 +15,8 @@ export default class Game {
     genderPreference: GenderPreference;
     currentPlayerCount: number;
     accessType: AccessType;
+    createdAt: Date;
+    updatedAt: Date;
 
     constructor(
         id: number, 
@@ -32,7 +34,9 @@ export default class Game {
         skillLevel: SkillLevel, 
         genderPreference: GenderPreference, 
         currentPlayerCount: number,
-        accessType: AccessType
+        accessType: AccessType,
+        createdAt: Date,
+        updatedAt: Date
     ) {
         this.id = id;
         this.sportId = sportId;
@@ -50,6 +54,8 @@ export default class Game {
         this.genderPreference = genderPreference;
         this.currentPlayerCount = currentPlayerCount;
         this.accessType = accessType;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 }
 
@@ -77,7 +83,9 @@ export class GameCreation {
     skillLevel?: SkillLevel;
     genderPreference?: GenderPreference;
     accessType?: AccessType;
-    
+    createdAt?: Date;
+    updatedAt?: Date;
+
     constructor(
         status: GameStatus,
         sportId?: number, 
@@ -100,7 +108,9 @@ export class GameCreation {
         isRecurring?: boolean,
         skillLevel?: SkillLevel,
         genderPreference?: GenderPreference,
-        accessType?: AccessType
+        accessType?: AccessType,
+        createdAt?: Date,
+        updatedAt?: Date
     ) {
         this.status = status;
         this.sportId = sportId;
@@ -124,6 +134,8 @@ export class GameCreation {
         this.skillLevel = skillLevel;
         this.genderPreference = genderPreference;
         this.accessType = accessType;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 }
 

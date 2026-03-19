@@ -120,7 +120,9 @@ export default class MockGameFacade implements IGameFacade {
             skillLevel: gameData.skillLevel || SkillLevel.All,
             genderPreference: gameData.genderPreference || GenderPreference.NoPreference,
             currentPlayerCount: 1,
-            accessType: gameData.accessType || AccessType.Public
+            accessType: gameData.accessType || AccessType.Public,
+            createdAt: gameData.createdAt || new Date(),
+            updatedAt: gameData.updatedAt || new Date()
         };
         MockDataStore.Games.set(newGameId, newGame);
         MockDataStore.userGames.set(currentUserId, [...(MockDataStore.userGames.get(currentUserId) || []), newGameId]);
@@ -128,12 +130,14 @@ export default class MockGameFacade implements IGameFacade {
 
     async updateGame(gameData: GameCreation): Promise<void> {
         const existingGame = MockDataStore.Games.get(gameData.id);
+        const updateAt = new Date();
         if (!existingGame) {
             throw new Error("Game not found");
         }
         if (existingGame.creatorId !== MockDataStore.currentUserId) {
             throw new Error("Only the creator can update the game");
         }
+        gameData.updatedAt = updateAt;
         await this.createGame(gameData);
     }
 
