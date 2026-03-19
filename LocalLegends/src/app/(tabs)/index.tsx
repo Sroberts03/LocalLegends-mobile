@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Pressable, StyleSheet, View, Text, ActivityIndicator, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { GameCreation, GameFilter, GameWithDetails } from '@/src/models/Game';
+import { GameCreation, GameFilter, GameWithDetails, AccessType } from '@/src/models/Game';
 import Sport from '@/src/models/Sport';
 import MockGameFacade from '@/src/server/mock/MockGameFacade';
 import FilterModal from '@/src/components/FilterModal';
@@ -54,6 +54,27 @@ const lastUpdatedDate = (lastUpdated: Date | null, now: Date) => {
     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+};
+
+const getOffsetCoordinates = (games: GameWithDetails[]) => {
+  const coordCounts = new Map<string, number>();
+
+  return games.map((game) => {
+    const key = `${game.latitude},${game.longitude}`;
+    const count = coordCounts.get(key) || 0;
+    coordCounts.set(key, count + 1);
+
+    if (count > 0) {
+      const angle = (count * 137.5) * (Math.PI / 180); 
+      const radius = 0.0001 * count; 
+      return {
+        ...game,
+        latitude: game.latitude + radius * Math.cos(angle),
+        longitude: game.longitude + radius * Math.sin(angle),
+      };
+    }
+    return game;
+  });
 };
 
 export default function MapScreen() {
@@ -166,6 +187,11 @@ export default function MapScreen() {
     minute: 'numeric',
   });
 
+  const isPrivate = (game: GameWithDetails) => {
+    if (!game) return false;
+    return game.game.accessType === AccessType.Private;
+  }
+
   return (
     <View style={styles.container}>
       <MapView
@@ -176,22 +202,27 @@ export default function MapScreen() {
         ref={mapRef}
         initialRegion={mapRegion}
       >
-        {games.map(game => (
-          <Marker
-            key={game.game.id}
-            coordinate={{ latitude: game.latitude, longitude: game.longitude }}
-            title={game.game.name}
-            description={game.locationName + ' - ' + dateFormatter.format(game.game.startTime)}
-            anchor={{ x: 0.5, y: 1 }}
-            onCalloutPress={() => setGameToCheckout(game)}
-        >
-          <View style={styles.markerWrap}>
-            <View style={[styles.markerHead, { backgroundColor: getMarkerColor(game.sportName) }]}>
-              <Ionicons name={getSportIcon(game.sportName)} size={16} color="#ffffff" />
-            </View>
-            <View style={[styles.markerTip, { borderTopColor: getMarkerColor(game.sportName) }]} />
-          </View>
-        </Marker>
+        {getOffsetCoordinates(games).map(game => (
+            <Marker
+              key={game.game.id}
+              coordinate={{ latitude: game.latitude, longitude: game.longitude }}
+              title={game.game.name}
+              description={game.locationName + ' - ' + dateFormatter.format(game.game.startTime)}
+              anchor={{ x: 0.5, y: 1 }}
+              onCalloutPress={() => setGameToCheckout(game)}
+            >
+              <View style={styles.markerWrap}>
+                <View style={[styles.markerHead, { backgroundColor: getMarkerColor(game.sportName) }]}>
+                  <Ionicons name={getSportIcon(game.sportName)} size={16} color="#ffffff" />
+                  {isPrivate(game) && (
+                    <View style={styles.lockBadge}>
+                      <Ionicons name="key" size={10} color="#ffffff" />
+                    </View>
+                  )}
+                </View>
+                <View style={[styles.markerTip, { borderTopColor: getMarkerColor(game.sportName) }]} />
+              </View>
+            </Marker>
         ))}
       </MapView>
 
@@ -263,6 +294,20 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
+  lockBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#facc15', 
+    borderRadius: 9,
+    width: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+    borderWidth: 1.5,
+    borderColor: '#ffffff', 
+  },
   loadingOverlay: {
     position: 'absolute',
     top: 0,
