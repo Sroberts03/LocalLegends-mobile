@@ -1,7 +1,6 @@
 import MapView, { Marker }from 'react-native-maps';
 import * as Location from 'expo-location';
 import React, { useEffect, useState, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
 import { Pressable, StyleSheet, View, Text } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -107,15 +106,9 @@ export default function MapScreen() {
     }
   }, [filters, server]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-      
-      return () => {
-        // Optional: Clean up logic if needed when screen is blurred
-      };
-    }, [loadData])
-  );
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleGameCreation = async (gameCreation: GameCreation) => {
     await server.createGame(gameCreation);
@@ -229,7 +222,9 @@ const styles = StyleSheet.create({
     top: 60, 
     left: 0,
     right: 0,
+    radius: 999,
     alignItems: 'center',
+    justifyContent: 'center',
     zIndex: 100,
   },
   loadingBlur: {
