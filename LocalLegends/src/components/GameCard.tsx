@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { GameWithDetails } from "../models/Game";
+import DeleteDraftConfirmation from "./DeleteDraftConfirmation";
 
 type GameCardProps = {
   game: GameWithDetails | GameCreation;
@@ -50,41 +51,56 @@ const formatGameTime = (startTime: Date | undefined) => {
 };
 
 export default function GameCard({ game, onPress, handleDeleteDraft }: GameCardProps) {
-  return (
-    <Pressable onPress={onPress} style={styles.card}>
-      <View style={styles.cardContent}>
-        {/* Left Side: Info */}
-        <View style={styles.info}>
-          <Text style={styles.gameName}>{game.game?.name || game.gameName}</Text>
-          <Text style={styles.sportName}>{game.sportName}</Text>
-          <Text style={styles.startTime}>{formatGameTime(game.game?.startTime || game.startTime)}</Text>
-        </View>
+  const [deleteConfirmationVisible, setDeleteConfirmationVisible] = React.useState(false);
 
-        {/* Right Side: Actions & Icon */}
-        <View style={styles.rightPillar}>
-          {handleDeleteDraft && (
-            <Pressable 
-              onPress={() => handleDeleteDraft(game.game?.id || game.id)} 
-              style={styles.deleteCircle}
-            >
-              <Ionicons name="trash-outline" size={18} color="#ef4444" />
-            </Pressable>
-          )}
-          <Ionicons 
-            name={sportIcon(game?.sportName)} 
-            size={32} 
-            color="#6366f1" 
-          />
+  return (
+    <View>
+      <Pressable onPress={onPress} style={styles.card}>
+        <View style={styles.cardContent}>
+          {/* Left Side: Info */}
+          <View style={styles.info}>
+            <Text style={styles.gameName}>{game.game?.name || game.gameName}</Text>
+            <Text style={styles.sportName}>{game.sportName}</Text>
+            <Text style={styles.startTime}>{formatGameTime(game.game?.startTime || game.startTime)}</Text>
+          </View>
+
+          {/* Right Side: Actions & Icon */}
+          <View style={styles.rightPillar}>
+            {handleDeleteDraft && (
+              <Pressable 
+                onPress={() => setDeleteConfirmationVisible(true)} 
+                style={styles.deleteCircle}
+              >
+                <Ionicons name="trash-outline" size={18} color="#ef4444" />
+              </Pressable>
+            )}
+            <Ionicons 
+              name={sportIcon(game?.sportName)} 
+              size={32} 
+              color="#6366f1" 
+            />
+          </View>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+
+      <DeleteDraftConfirmation
+        visible={deleteConfirmationVisible}
+        onConfirm={() => {
+          if (handleDeleteDraft) {
+            handleDeleteDraft(game.game?.id || game.id);
+          }
+          setDeleteConfirmationVisible(false);
+        }}
+        onCancel={() => setDeleteConfirmationVisible(false)}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',
-    borderRadius: 16, // Softer corners
+    borderRadius: 16, 
     padding: 16,
     marginVertical: 8,
     width: '100%',
@@ -97,16 +113,16 @@ const styles = StyleSheet.create({
   cardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', // Vertically centers everything in the row
+    alignItems: 'center',
   },
   info: {
     flex: 1,
-    gap: 2, // Consistent spacing between lines
+    gap: 2,
   },
   rightPillar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12, // Spaces the trash can and sport icon
+    gap: 12,
   },
   deleteCircle: {
     backgroundColor: '#fee2e2',
