@@ -101,16 +101,95 @@ export default function MyGamesScreen() {
         </View>
       </View>
 
-      {/* Game List */}
+      {/* Schedule-style layout: Today, This Week, Later */}
       <ScrollView contentContainerStyle={styles.listContent}>
         {myGames.length > 0 ? (
-          myGames.map(game => (
-            <GameCard 
-              key={cardId(game)} 
-              game={game} 
-              onPress={() => handleGamePress(game)} 
-            />
-          ))
+          draftGames ? (
+            myGames.map(game => (
+              <GameCard 
+                key={cardId(game)} 
+                game={game} 
+                onPress={() => handleGamePress(game)} 
+              />
+            ))
+          ) : (
+            (() => {
+              // Categorize games
+              const todayGames: (GameWithDetails | GameCreation)[] = [];
+              const weekGames: (GameWithDetails | GameCreation)[] = [];
+              const laterGames: (GameWithDetails | GameCreation)[] = [];
+              const now = new Date();
+              const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+              const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+              const endOfWeek = new Date(today);
+              endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
+              endOfWeek.setHours(23, 59, 59);
+              myGames.forEach(game => {
+                const start = game.game?.startTime || game.startTime;
+                if (!start) return;
+                const startDate = new Date(start);
+                if (startDate >= today && startDate <= endOfToday) {
+                  todayGames.push(game);
+                } else if (startDate > endOfToday && startDate <= endOfWeek) {
+                  weekGames.push(game);
+                } else if (startDate > endOfWeek) {
+                  laterGames.push(game);
+                }
+              });
+              return (
+                <>
+                  {todayGames.length > 0 && (
+                    <View style={styles.dateSection}>
+                      <Text style={styles.dateHeader}>Today</Text>
+                      {todayGames.sort((a, b) => {
+                        const aTime = a.game?.startTime || a.startTime;
+                        const bTime = b.game?.startTime || b.startTime;
+                        return new Date(aTime).getTime() - new Date(bTime).getTime();
+                      }).map(game => (
+                        <GameCard 
+                          key={cardId(game)} 
+                          game={game} 
+                          onPress={() => handleGamePress(game)} 
+                        />
+                      ))}
+                    </View>
+                  )}
+                  {weekGames.length > 0 && (
+                    <View style={styles.dateSection}>
+                      <Text style={styles.dateHeader}>This Week</Text>
+                      {weekGames.sort((a, b) => {
+                        const aTime = a.game?.startTime || a.startTime;
+                        const bTime = b.game?.startTime || b.startTime;
+                        return new Date(aTime).getTime() - new Date(bTime).getTime();
+                      }).map(game => (
+                        <GameCard 
+                          key={cardId(game)} 
+                          game={game} 
+                          onPress={() => handleGamePress(game)} 
+                        />
+                      ))}
+                    </View>
+                  )}
+                  {laterGames.length > 0 && (
+                    <View style={styles.dateSection}>
+                      <Text style={styles.dateHeader}>Later</Text>
+                      {laterGames.sort((a, b) => {
+                        const aTime = a.game?.startTime || a.startTime;
+                        const bTime = b.game?.startTime || b.startTime;
+                        return new Date(aTime).getTime() - new Date(bTime).getTime();
+                      }).map(game => (
+                        <GameCard 
+                          key={cardId(game)} 
+                          game={game} 
+                          onPress={() => handleGamePress(game)} 
+                        />
+                      ))}
+                    </View>
+                  )}
+                </>
+              );
+            })()
+          )
         ) : (
           <Text style={styles.emptyText}>No {draftGames ? 'draft' : 'active'} games found.</Text>
         )}
@@ -137,7 +216,7 @@ export default function MyGamesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb', 
+    backgroundColor: '#f9fafb',
   },
   header: {
     paddingTop: 60,
@@ -180,12 +259,24 @@ const styles = StyleSheet.create({
     color: '#6366f1',
   },
   listContent: {
-    padding: 20,
-    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 75,
+    alignItems: 'stretch',
+  },
+  dateSection: {
+    marginBottom: 24,
+  },
+  dateHeader: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#6366f1',
+    marginBottom: 8,
+    marginTop: 8,
   },
   emptyText: {
     marginTop: 40,
     color: '#9ca3af',
     fontSize: 16,
+    alignSelf: 'center',
   }
 });
