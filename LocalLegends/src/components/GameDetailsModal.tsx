@@ -6,6 +6,7 @@ import { GameWithDetails } from '../models/Game';
 type GameDetailsModalProps = {
   game: GameWithDetails | null;
   onClose: () => void;
+  onJoinOrLeave: (gameId: number) => void;
 };
 
 const formatCalendarDate = (dateValue: Date) => {
@@ -56,7 +57,7 @@ function getSkillBadgeColor(skillLevel: string) {
   }
 }
 
-export default function GameDetailsModal({ game, onClose }: GameDetailsModalProps) {
+export default function GameDetailsModal({ game, onClose, onJoinOrLeave }: GameDetailsModalProps) {
   if (!game) {
     return null;
   }
@@ -145,8 +146,10 @@ export default function GameDetailsModal({ game, onClose }: GameDetailsModalProp
             </View>
 
             <View style={styles.section}>
-                <Pressable style={styles.joingGameButton}>
-                    <Text style={styles.joinGameButtonText}>Join Game</Text>
+                <Pressable style={game.userHasJoined ? styles.alreadyJoinedButton : styles.joingGameButton} onPress={() => onJoinOrLeave(game.game.id)}>
+                    <Text style={styles.joinGameButtonText}>
+                        {game.userHasJoined ? 'Leave Game' : 'Join Game'}
+                    </Text>
                 </Pressable>
             </View>
           </ScrollView>
@@ -328,5 +331,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  alreadyJoinedButton: {
+    backgroundColor: '#d70000',
+    paddingVertical: 14,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
   },
 });

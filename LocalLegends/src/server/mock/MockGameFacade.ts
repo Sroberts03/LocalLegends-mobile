@@ -19,12 +19,13 @@ export default class MockGameFacade implements IGameFacade {
     }
 
     async listGames(filter: GameFilter): Promise<GameWithDetails[]> {
-        let games = Array.from(MockDataStore.Games.values());
+        let games = Array.from(MockDataStore.Games.values()).filter(g => g.status === "active" || g.status === "coordination");
         const locations = MockDataStore.Locations;
         const sports = MockDataStore.Sports;
         const users = MockDataStore.Users;
+        const userGames = MockDataStore.userGames;
         const currentUserId = MockDataStore.currentUserId;
-        const userGameIds = MockDataStore.userGames.get(currentUserId) || [];
+        const userGameIds = userGames.get(currentUserId) || [];
 
         if (filter.sportIds && filter.sportIds.length > 0) {
             games = games.filter(g => filter.sportIds!.includes(g.sportId));
@@ -44,22 +45,27 @@ export default class MockGameFacade implements IGameFacade {
             games = games.filter(g => favoriteSportIds.includes(g.sportId));
         }
         games = games.filter(g => this.calculateDistance({ latitude: locations.get(g.locationId)!.latitude, longitude: locations.get(g.locationId)!.longitude }, { latitude: filter.latitude, longitude: filter.longitude }) <= filter.maxDistance);
-        games = games.filter(g => g.status === "active" || g.status === "coordination");
         games = games.filter(g => g.startTime > new Date());
         games = games.filter(g => g.currentPlayerCount < g.maxPlayers);
         games = games.filter(g => g.creatorId !== currentUserId);
         games = games.filter(g => !userGameIds.includes(g.id));
-        return Promise.resolve(games.map(g => {
-            const location = locations.get(g.locationId)!;
-            return {
-                game: g,
-                locationName: location.name,
-                sportName: sports.get(g.sportId)!.name,
-                creatorName: users.get(g.creatorId)!.displayName,
-                latitude: location.latitude,
-                longitude: location.longitude
-            };
-        }));
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve(games.map(g => {
+                    const location = locations.get(g.locationId)!;
+                    return {
+                        game: g,
+                        locationName: location.name,
+                        sportName: sports.get(g.sportId)!.name,
+                        creatorName: users.get(g.creatorId)!.displayName,
+                        memberProfiles: userGames.get(g.id) || [],
+                        latitude: location.latitude,
+                        longitude: location.longitude,
+                        userHasJoined: false
+                    };
+                }));
+            }, 2000);
+        });
     }
 
     async getSports() {
@@ -96,13 +102,13 @@ export default class MockGameFacade implements IGameFacade {
             }
         }
 
-        const newGameId = MockDataStore.Games.size + 1;
+        const newGameId = gameData.id || MockDataStore.Games.size + 1;
        
         const newGame: Game = {
             id: newGameId,
             creatorId: MockDataStore.currentUserId,
             sportId: gameData.sportId!,
-            locationId: locationId!,
+            locationId: locationId,
             name: gameData.gameName || "Untitled Game",
             description: gameData.gameDescription || "",
             maxPlayers: gameData.maxPlayers || 10,
@@ -117,5 +123,105 @@ export default class MockGameFacade implements IGameFacade {
         };
         MockDataStore.Games.set(newGameId, newGame);
         MockDataStore.userGames.set(currentUserId, [...(MockDataStore.userGames.get(currentUserId) || []), newGameId]);
+    }
+
+    async updateGame(gameData: GameCreation): Promise<void> {
+        const existingGame = MockDataStore.Games.get(gameData.id);
+        if (!existingGame) {
+            throw new Error("Game not found");
+        }
+        if (existingGame.creatorId !== MockDataStore.currentUserId) {
+            throw new Error("Only the creator can update the game");
+        }
+        await this.createGame(gameData);
+    }
+
+    async joinGame(gameId: number): Promise<void> {
+        const game = MockDataStore.Games.get(gameId);
+        if (!game) {
+            throw new Error("Game not found");
+        }
+        if (game.currentPlayerCount >= game.maxPlayers) {
+            throw new Error("Game is full");
+        }
+        const currentUserId = MockDataStore.currentUserId;
+        const userGameIds = MockDataStore.userGames.get(currentUserId) || [];
+        if (userGameIds.includes(gameId)) {
+            throw new Error("Already joined this game");
+        }
+        game.currentPlayerCount += 1;
+        MockDataStore.userGames.set(currentUserId, [...userGameIds, gameId]);
+    }
+
+    async listMyActiveGames(): Promise<GameWithDetails[]> {
+        const currentUserId = MockDataStore.currentUserId;
+        const userGameIds = MockDataStore.userGames.get(currentUserId) || [];
+        const games = Array.from(MockDataStore.Games.values()).filter(g => userGameIds.includes(g.id) && (g.status === "active" || g.status === "coordination"));
+        const locations = MockDataStore.Locations;
+        const sports = MockDataStore.Sports;
+        const users = MockDataStore.Users;
+        const userGames = MockDataStore.userGames;
+
+        return Promise.resolve(games.map(g => {
+            const location = locations.get(g.locationId)!;
+            return {
+                game: g,
+                locationName: location.name,
+                sportName: sports.get(g.sportId)!.name,
+                creatorName: users.get(g.creatorId)!.displayName,
+                latitude: location.latitude,
+                longitude: location.longitude,
+                memberProfiles: userGames.get(g.id) || [],
+                userHasJoined: true
+            };
+        }));
+    }
+
+    async listMyDraftGames(): Promise<GameCreation[]> {
+        const currentUserId = MockDataStore.currentUserId;
+        const games = Array.from(MockDataStore.Games.values()).filter(g => g.creatorId === currentUserId && g.status === "draft");
+        const locations = MockDataStore.Locations;
+
+        return Promise.resolve(games.map(g => {
+            const location = locations.get(g.locationId)!;
+            return {
+                id: g.id,
+                sportId: g.sportId,
+                googlePlaceId: location?.googlePlaceId,
+                gameName: g.name,
+                gameDescription: g.description,
+                streetAddress: location?.streetAddress,
+                city: location?.city,
+                state: location?.state,
+                zipCode: location?.zipCode,
+                country: location?.country,
+                latitude: location?.latitude,
+                longitude: location?.longitude,
+                locationName: location?.name,
+                locationDescription: location?.description,
+                maxPlayers: g.maxPlayers,
+                minPlayers: g.minPlayers,
+                startTime: g.startTime,
+                endTime: g.endTime,
+                status: g.status,
+                isRecurring: g.isRecurring,
+                skillLevel: g.skillLevel,
+                genderPreference: g.genderPreference
+            };
+        }));
+    }
+
+    async leaveGame(gameId: number): Promise<void> {
+        const game = MockDataStore.Games.get(gameId);
+        if (!game) {
+            throw new Error("Game not found");
+        }
+        const currentUserId = MockDataStore.currentUserId;
+        const userGameIds = MockDataStore.userGames.get(currentUserId) || [];
+        if (!userGameIds.includes(gameId)) {
+            throw new Error("Not a member of this game");
+        }
+        game.currentPlayerCount -= 1;
+        MockDataStore.userGames.set(currentUserId, userGameIds.filter(id => id !== gameId));
     }
 }

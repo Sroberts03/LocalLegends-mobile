@@ -50,6 +50,7 @@ export default class Game {
 }
 
 export class GameCreation {
+    id: number;
     sportId?: number;
     googlePlaceId?: string;
     gameName?: string;
@@ -158,6 +159,8 @@ export interface GameWithDetails {
     game: Game;
     sportName: string;
     creatorName: string;
+    memberProfiles: Profile[];
+    userHasJoined: boolean;
     locationName: string;
     latitude: number;
     longitude: number;

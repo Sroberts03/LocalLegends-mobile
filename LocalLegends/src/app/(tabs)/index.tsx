@@ -1,7 +1,8 @@
 import MapView, { Marker }from 'react-native-maps';
 import * as Location from 'expo-location';
-import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { Pressable, StyleSheet, View, Text } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { GameCreation, GameFilter, GameWithDetails } from '@/src/models/Game';
@@ -53,6 +54,7 @@ export default function MapScreen() {
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [createGameVisible, setCreateGameVisible] = useState(false);
   const [sports, setSports] = useState<Sport[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [gameToCheckout, setGameToCheckout] = useState<GameWithDetails | null>(null);
 
   const mapRegion = location
@@ -91,27 +93,39 @@ export default function MapScreen() {
     })();
   }, []);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadData = async () => {
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
       const serverGames = await server.listGames(filters);
       const serverSports = await server.getSports();
-      if (isMounted) {
-        setSports(serverSports);
-        setGames(serverGames);
-      }
-    };
-
-    loadData();
-
-    return () => {
-      isMounted = false;
-    };
+      setSports(serverSports);
+      setGames(serverGames);
+    } catch (error) {
+      console.error("Failed to refresh games:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [filters, server]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+      
+      return () => {
+        // Optional: Clean up logic if needed when screen is blurred
+      };
+    }, [loadData])
+  );
 
   const handleGameCreation = async (gameCreation: GameCreation) => {
     await server.createGame(gameCreation);
+  }
+
+  const handleJoinGame = async (gameId: number) => {
+    await server.joinGame(gameId);
+    setGameToCheckout(null);
+    const updatedGames = await server.listGames(filters);
+    setGames(updatedGames);
   }
 
   const dateFormatter = new Intl.DateTimeFormat('en-US', {
@@ -150,7 +164,21 @@ export default function MapScreen() {
         ))}
       </MapView>
 
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <BlurView intensity={80} tint="light" style={styles.loadingBlur}>
+            <Ionicons name="refresh" size={32} color="#6366f1" style={{ marginBottom: 8 }} />
+            <Text style={styles.loadingText}>Loading...</Text>
+          </BlurView>
+        </View>
+      )}
+
       <View style={styles.actionPillar}>
+        <Pressable onPress={loadData}>
+          <BlurView intensity={65} tint="light" style={styles.glassActionButton}>
+            <Ionicons name="refresh" color="#111827" size={22} />
+          </BlurView>
+        </Pressable>
         <Pressable onPress={() => setFiltersVisible(true)}>
           <BlurView intensity={65} tint="light" style={styles.glassActionButton}>
             <Ionicons name="options-outline" color="#111827" size={22} />
@@ -189,12 +217,36 @@ export default function MapScreen() {
       <GameDetailsModal
         game={gameToCheckout}
         onClose={() => setGameToCheckout(null)}
+        onJoinOrLeave={handleJoinGame}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  loadingOverlay: {
+    position: 'absolute',
+    top: 60, 
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  loadingBlur: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999, 
+    flexDirection: 'row', 
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
+  },
+  loadingText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4b5563',
+    marginLeft: 8,
+  },
   container: {
     flex: 1,
   },
