@@ -61,4 +61,25 @@ export default class MockProfileFacade implements IProfileFacade {
             mostRecentGames: mostRecentGames
         };
     }
+
+    async getUserProfile(userId: string): Promise<ProfileInfo> {
+        const user = MockDataStore.Users.get(userId);
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        const userFavoriteSportsIds = MockDataStore.userSports.get(userId) || [];
+        const favoriteSports = userFavoriteSportsIds
+            .map((id) => MockDataStore.Sports.get(id))
+            .filter((v): v is Sport => !!v);
+
+        return {
+            profile: user,
+            gamesCreated: 0, // For simplicity, we won't calculate this for other users in the mock
+            gamesJoined: 0,   // Same as above
+            favoriteSports: favoriteSports,
+            mostRecentGames: [], // Same as above
+            currentUserIsFollowing: false
+        };
+    }
 }

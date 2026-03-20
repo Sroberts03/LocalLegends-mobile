@@ -294,4 +294,42 @@ export default class MockGameFacade implements IGameFacade {
             }
         }
     }
+
+    async getGameDetailsById(gameId: number): Promise<GameWithDetails> {
+        const game = MockDataStore.Games.get(gameId);
+        if (!game) {
+            throw new Error("Game not found");
+        }
+        const location = MockDataStore.Locations.get(game.locationId)!;
+        const sport = MockDataStore.Sports.get(game.sportId)!;
+        const users = MockDataStore.Users;
+        const userGames = MockDataStore.userGames;
+        const memberProfiles: Profile[] = [];
+        const memberIds = new Set<string>();
+        userGames.forEach(gameIds => {
+            if (gameIds.includes(game.id)) {
+                const userId = Array.from(MockDataStore.userGames.entries()).find(([_, ids]) => ids.includes(game.id))?.[0];
+                if (userId) {
+                    memberIds.add(userId);
+                }
+            }
+        });
+        memberIds.forEach(id => {
+            const profile = users.get(id);
+            if (profile) {
+                memberProfiles.push(profile);
+            }
+        });
+
+        return Promise.resolve({
+            game: game,
+            locationName: location.name,
+            sportName: sport.name,
+            creatorName: users.get(game.creatorId)!.displayName,
+            latitude: location.latitude,
+            longitude: location.longitude,
+            memberProfiles: memberProfiles,
+            userHasJoined: userGames.get(MockDataStore.currentUserId)?.includes(game.id) || false
+        });
+    }
 }

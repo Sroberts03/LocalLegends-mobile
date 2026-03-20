@@ -206,4 +206,5 @@ export interface SearchedGame {
     genderPreference: GenderPreference;
     currentPlayerCount: number;
     maxPlayers: number;
+    currentUserHasJoined: boolean;
 }

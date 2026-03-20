@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [profile, setProfile] = useState<ProfileInfo | null>(null); 
+  const [profile, setProfile] = useState<ProfileInfo | null>(null);
   const server = useMemo(() => new MockProfileFacade(), []);
 
   // 1. Fetch data returning the value, rather than setting state directly
@@ -22,7 +22,6 @@ export default function ProfileScreen() {
     }
   }, [server]);
 
-  // 2. Correct useFocusEffect syntax (wrapping the logic in useCallback)
   useFocusEffect(
     useCallback(() => {
       let isMounted = true;
@@ -30,7 +29,6 @@ export default function ProfileScreen() {
       const loadProfile = async () => {
         const profileData = await fetchData();
         
-        // 3. The safe check: Only update state if the user hasn't left the screen yet
         if (isMounted && profileData) {
           setProfile(profileData);
         }
@@ -38,11 +36,10 @@ export default function ProfileScreen() {
 
       loadProfile();
 
-      // Cleanup function runs when the screen loses focus
       return () => {
         isMounted = false;
       };
-    }, [fetchData]) // Dependencies go here inside the useCallback
+    }, [fetchData])
   );
 
   return (
@@ -56,7 +53,7 @@ export default function ProfileScreen() {
         </Pressable>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <UserProfile profile={profile} />
+        {profile && <UserProfile profile={profile} />}
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,4 +1,5 @@
 import Sport from "./Sport";
+import { GameWithDetails } from "./Game";
 
 export default class Profile {
     id: string;
@@ -31,4 +32,5 @@ export type ProfileInfo = {
     gamesJoined: number;
     favoriteSports: Sport[];
     mostRecentGames: GameWithDetails[];
+    currentUserIsFollowing?: boolean;
 }

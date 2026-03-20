@@ -19,6 +19,7 @@ export default class MockSearchFacade implements ISearchFacade {
             genderPreference: game.genderPreference,
             currentPlayerCount: game.currentPlayerCount,
             maxPlayers: game.maxPlayers,
+            currentUserHasJoined: MockDataStore.userGames.get(MockDataStore.currentUserId)?.includes(game.id) || false, 
         };
     }
 

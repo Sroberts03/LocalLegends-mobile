@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   View, 
   Text, 
@@ -6,65 +6,161 @@ import {
   StyleSheet,  
   ScrollView, 
   TouchableOpacity,
+  Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from "react-native-safe-area-context";
+import Profile, { ProfileInfo } from '@/src/models/Profile';
+import { GameWithDetails, SearchedGame } from '@/src/models/Game';
 import MockSearchFacade from '@/src/server/mock/MockSearchFacade';
-import Profile from '@/src/models/Profile';
-import { SearchedGame } from '@/src/models/Game';
+import MockProfileFacade from '@/src/server/mock/MockProfileFacade';
+import MockGameFacade from '@/src/server/mock/MockGameFacade';
 import useUserLocation from '@/src/hooks/useUserLocation';
 import useRecentSearches from '@/src/hooks/useRecentSearches';
+import GameDetailsModal from '@/src/components/GameDetailsModal';
+import UserSearchModal from '@/src/components/UserSearchModal';
+
+const gameState = (game: SearchedGame) => {
+  if (game.currentUserHasJoined) return '✓ You\'re in!';
+  if (game.currentPlayerCount >= game.maxPlayers) return 'No spots left';
+  return 'Spots Available! Join now!';
+}
 
 export default function SearchScreen() {
-  const server = React.useMemo(() => new MockSearchFacade(), []);
+  const server = useMemo(() => new MockSearchFacade(), []);
+  const userServer = useMemo(() => new MockProfileFacade(), []);
+  const gameServer = useMemo(() => new MockGameFacade(), []);
+  
   const { location } = useUserLocation();
   const { recentSearches, addSearch, clearSearches } = useRecentSearches();
-  const [searchResults, setSearchResults] = useState<{ games: SearchedGame[], players: Profile[] }>({ games: [], players: [] });
+
+  // State
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All'); 
   const [suggestedPlayers, setSuggestedPlayers] = useState<Profile[]>([]);
   const [trendingGames, setTrendingGames] = useState<SearchedGame[]>([]);
+  const [searchResults, setSearchResults] = useState<{ games: SearchedGame[], players: Profile[] }>({ games: [], players: [] });
+  
+  // Follow/Unfollow State
+  const [followedIds, setFollowedIds] = useState<Set<string>>(new Set());
+
+  // Modal State
+  const [gameWithDetails, setGameWithDetails] = useState<GameWithDetails | null>(null);
+  const [profileInfo, setProfileInfo] = useState<ProfileInfo | null>(null);
 
   const tabs = ['All', 'Games', 'People'];
 
+  // Fetch Trending/Suggested Data on Mount
   useEffect(() => {
     let isMounted = true;
-
     const fetchInitialData = async () => {
       try {
         const lat = location?.latitude || 37.7749;
         const lng = location?.longitude || -122.4194;
 
-        const players = await server.getSuggestedPlayers(lat, lng);
-        const games = await server.getTrendingGames(lat, lng);
+        const [players, games] = await Promise.all([
+            server.getSuggestedPlayers(lat, lng),
+            server.getTrendingGames(lat, lng)
+        ]);
 
         if (isMounted) {
           setSuggestedPlayers(players);
           setTrendingGames(games);
         }
       } catch (error) {
-        console.error("Failed to fetch search data:", error);
+        console.error("Failed to fetch initial search data:", error);
       }
     };
-
     fetchInitialData();
-
     return () => { isMounted = false; };
   }, [server, location]);
 
+  // Execute Search
   const onSubmitSearch = async () => {
     if (searchQuery.trim().length > 0) {
         addSearch(searchQuery);
-        const searchResults = await server.searchAll(searchQuery, { games: activeTab === 'Games' || activeTab === 'All', players: activeTab === 'People' || activeTab === 'All' }, location?.latitude || 0, location?.longitude || 0, 20, 0);
-        setSearchResults(searchResults);
+        const results = await server.searchAll(
+            searchQuery, 
+            { 
+                games: activeTab === 'Games' || activeTab === 'All', 
+                players: activeTab === 'People' || activeTab === 'All' 
+            }, 
+            location?.latitude || 0, 
+            location?.longitude || 0, 
+            20, 
+            0
+        );
+        setSearchResults(results);
     }
   };
 
-  // Helper to format dates nicely for the UI
+  // Logic to toggle follow state
+  const handleFollowUnfollowPlayer = (playerId: string) => {
+    setFollowedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(playerId)) {
+        newSet.delete(playerId);
+      } else {
+        newSet.add(playerId);
+      }
+      return newSet;
+    });
+    console.log('TODO implement follow/unfollow logic with server');
+  };
+
+  const handlePlayerPress = async (playerId: string) => {
+    const profile = await userServer.getUserProfile(playerId);
+    setProfileInfo(profile);
+  };
+
+  const handleGamePress = async (gameId: number) => {
+    try {
+      const gameDetails = await gameServer.getGameDetailsById(gameId);
+      setGameWithDetails(gameDetails);
+    } catch (error) {
+      console.error("Failed to fetch game details:", error);
+    }
+  };
+
+  const handleJoinOrLeaveGame = async () => {
+    if (!gameWithDetails) return;
+    if (gameWithDetails.userHasJoined) {
+      await gameServer.leaveGame(gameWithDetails.game.id)
+    } else {
+      await gameServer.joinGame(gameWithDetails.game.id)
+    }
+    setTrendingGames([...trendingGames.filter(g => g.id !== gameWithDetails.game.id)]);
+    setGameWithDetails(null);
+  }
+
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
         month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'
     }).format(new Date(date));
+  };
+
+  // Reusable Player Card component to handle dynamic button states
+  const renderPlayerCard = (player: Profile) => {
+    const isFollowing = followedIds.has(player.id);
+    return (
+      <TouchableOpacity key={player.id} style={styles.playerCard} onPress={() => handlePlayerPress(player.id)}>
+        <View style={styles.playerAvatar}>
+          <Image source={{ uri: player.profileImageUrl }} style={styles.avatarImage} />
+        </View>
+        <View style={styles.playerInfo}>
+          <Text style={styles.playerName}>{player.displayName}</Text>
+          <Text style={styles.playerDetail}>Suggested for you</Text>
+        </View>
+        <TouchableOpacity 
+          style={[styles.addButton, isFollowing && styles.followingButton]} 
+          onPress={() => handleFollowUnfollowPlayer(player.id)}
+        >
+          <Text style={[styles.addButtonText, isFollowing && styles.followingButtonText]}>
+            {isFollowing ? 'Following' : 'Follow'}
+          </Text>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    );
   };
 
   return (
@@ -87,7 +183,7 @@ export default function SearchScreen() {
         </View>
       </View>
 
-      {/* Search Tabs / Segmented Control */}
+      {/* Tabs */}
       <View style={styles.tabContainer}>
         {tabs.map((tab) => (
           <TouchableOpacity 
@@ -104,38 +200,26 @@ export default function SearchScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
 
-        {/* 1. RENDER: Search Results */}
+        {/* Search Results */}
         {searchQuery !== '' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Search Results</Text>
             {searchResults.games.map(game => (
-              <TouchableOpacity key={game.id} style={styles.gameCard}>
+              <TouchableOpacity key={game.id} style={styles.gameCard} onPress={() => handleGamePress(game.id)}>
                 <View style={styles.gameHeader}>
                   <Text style={styles.gameTitle}>{game.name}</Text>
                   <Text style={styles.gameSport}>{game.sportName}</Text>
                 </View>
                 <Text style={styles.gameLocation}>{game.locationName}</Text>
                 <Text style={styles.gameTime}>{formatDate(game.startTime)}</Text>
+                <Text style={!game.currentUserHasJoined && game.currentPlayerCount < game.maxPlayers ? styles.invitationText : styles.playerDetail}>{gameState(game)}</Text>
               </TouchableOpacity>
             ))}
-            {searchResults.players.map(player => (
-              <TouchableOpacity key={player.id} style={styles.playerCard}>
-                <View style={styles.playerAvatar}>
-                  <Ionicons name="person" size={24} color="#FFF" />
-                </View>
-                <View style={styles.playerInfo}>
-                  <Text style={styles.playerName}>{player.displayName}</Text>
-                  <Text style={styles.playerDetail}>Player Profile</Text>
-                </View>
-                <TouchableOpacity style={styles.addButton}>
-                  <Text style={styles.addButtonText}>View</Text>
-                </TouchableOpacity>
-              </TouchableOpacity>
-            ))}
+            {searchResults.players.map(player => renderPlayerCard(player))}
           </View>
         )}
 
-        {/* 2. RENDER: Recent Searches */}
+        {/* Recent Searches */}
         {searchQuery === '' && recentSearches.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -150,7 +234,7 @@ export default function SearchScreen() {
                     style={styles.recentItem}
                     onPress={() => {
                         setSearchQuery(item);
-                        addSearch(item); // Bumps it to the top of the list
+                        addSearch(item);
                     }}
                 >
                     <Ionicons name="time-outline" size={20} color="#8E8E93" />
@@ -160,33 +244,20 @@ export default function SearchScreen() {
           </View>
         )}
         
-        {/* 3. RENDER: Suggested Players */}
+        {/* Suggested Players */}
         {(activeTab === 'All' || activeTab === 'People') && suggestedPlayers.length > 0 && searchQuery === '' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Suggested Players</Text>
-            {suggestedPlayers.map(player => (
-                <TouchableOpacity key={player.id} style={styles.playerCard}>
-                    <View style={styles.playerAvatar}>
-                        <Ionicons name="person" size={24} color="#FFF" />
-                    </View>
-                    <View style={styles.playerInfo}>
-                        <Text style={styles.playerName}>{player.displayName}</Text>
-                        <Text style={styles.playerDetail}>Suggested for you</Text>
-                    </View>
-                    <TouchableOpacity style={styles.addButton}>
-                        <Text style={styles.addButtonText}>Add</Text>
-                    </TouchableOpacity>
-                </TouchableOpacity>
-            ))}
+            {suggestedPlayers.map(player => renderPlayerCard(player))}
           </View>
         )}
 
-        {/* 4. RENDER: Trending Games */}
+        {/* Trending Games */}
         {(activeTab === 'All' || activeTab === 'Games') && trendingGames.length > 0 && searchQuery === '' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Trending Nearby</Text>
             {trendingGames.map(game => (
-                <TouchableOpacity key={game.id} style={styles.gameCard}>
+                <TouchableOpacity key={game.id} style={styles.gameCard} onPress={() => handleGamePress(game.id)}>
                     <View style={styles.gameHeader}>
                         <Text style={styles.gameTitle}>{game.name}</Text>
                         <Text style={styles.gameSport}>{game.sportName}</Text>
@@ -199,6 +270,20 @@ export default function SearchScreen() {
         )}
 
       </ScrollView>
+
+      {/* Modals */}
+      <GameDetailsModal
+        game={gameWithDetails}
+        onClose={() => setGameWithDetails(null)}
+        onJoinOrLeave={() => handleJoinOrLeaveGame()}
+      />
+
+      <UserSearchModal
+        visible={!!profileInfo}
+        profileInfo={profileInfo}
+        handleClose={() => setProfileInfo(null)}
+        handleFollowUnfollowPlayer={handleFollowUnfollowPlayer}
+      />
     </SafeAreaView>
   );
 }
@@ -359,6 +444,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    overflow: 'hidden'
+  },
+  avatarImage: {
+    width: 48, 
+    height: 48, 
+    borderRadius: 24 
   },
   playerInfo: {
     flex: 1,
@@ -373,15 +464,29 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#8E8E93',
   },
+  invitationText: {
+    fontSize: 14,
+    color: '#4f46e5',
+    fontWeight: '500',
+    marginTop: 6,
+  },
   addButton: {
     backgroundColor: '#EAEAFF',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    minWidth: 90,
+    alignItems: 'center'
   },
   addButtonText: {
     color: '#5C5CBE',
     fontWeight: '600',
     fontSize: 14,
+  },
+  followingButton: {
+    backgroundColor: '#EFEFF4',
+  },
+  followingButtonText: {
+    color: '#1C1C1E',
   },
 });

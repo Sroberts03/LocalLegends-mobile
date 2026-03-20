@@ -1,12 +1,13 @@
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { useState } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import GameCard from "@/src/components/GameCard";
 import { GameWithDetails } from "../models/Game";
 import { ProfileInfo } from "../models/Profile";
 
 type UserProfileProps = {
-    profile: ProfileInfo | null;
-    handleFollow?: () => void;
+    profile: ProfileInfo;
+    handleFollowUnfollow?: (playerId: string) => void;
 }
 
 const sportIconMap = (sportName: string) => {
@@ -20,10 +21,11 @@ const sportIconMap = (sportName: string) => {
       default:
         return 'star';
     }
-  };
+};
 
-export default function UserProfile({ profile, handleFollow }: UserProfileProps) {
+export default function UserProfile({ profile, handleFollowUnfollow }: UserProfileProps) {
     // Helper for empty states
+    const [isFollowing, setIsFollowing] = useState<boolean | null>(profile?.currentUserIsFollowing ?? null);
     const displayName = profile?.profile.displayName || "User";
     const favoriteSports = profile?.favoriteSports;
     const mostRecentGames = profile?.mostRecentGames;
@@ -46,12 +48,14 @@ export default function UserProfile({ profile, handleFollow }: UserProfileProps)
         />
         <View style={styles.nameRow}>
             <Text style={styles.displayName}>{displayName}</Text>
-            {handleFollow && (
-            <Pressable onPress={handleFollow}>
-                <Ionicons name="person-add" size={20} color="#4f46e5" />
-            </Pressable>
-            )}
         </View>
+        {handleFollowUnfollow && (
+              <Pressable onPress={() => { setIsFollowing(!isFollowing); handleFollowUnfollow(profile.profile.id)}}>
+                  <Text style={isFollowing ? styles.unfollowButton : styles.followButton}>
+                    {isFollowing ? 'Following' : 'Follow'}
+                  </Text>
+              </Pressable>
+        )}
         {/* Favorite Sports */}
         <View>
         {favoriteSportsNames && favoriteSportsNames.length > 0 ? (
@@ -244,4 +248,29 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 50,
   },
+  followButton: {
+    backgroundColor: '#4f46e5',
+    color: '#ffffff',
+    fontSize: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    fontWeight: '600',
+    alignItems: 'center',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  unfollowButton: {
+    fontSize: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    fontWeight: '600',
+    alignItems: 'center',
+    textAlign: 'center',
+    marginBottom: 16,
+    backgroundColor: '#dadada',
+    color: '#000000',
+  },
+
 });
