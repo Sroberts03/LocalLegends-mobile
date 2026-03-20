@@ -1,15 +1,21 @@
-import MapView, { Marker }from 'react-native-maps';
-import * as Location from 'expo-location';
+import MapView, { Marker } from 'react-native-maps';
 import React, { useEffect, useState, useCallback } from 'react';
 import { Pressable, StyleSheet, View, Text, ActivityIndicator, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
+
+// Models & Facades
 import { GameCreation, GameFilter, GameWithDetails, AccessType } from '@/src/models/Game';
 import Sport from '@/src/models/Sport';
 import MockGameFacade from '@/src/server/mock/MockGameFacade';
+
+// Components
 import FilterModal from '@/src/components/FilterModal';
 import CreateGame from '@/src/components/CreateGame';
 import GameDetailsModal from '@/src/components/GameDetailsModal';
+
+// Hooks
+import useUserLocation from '@/src/hooks/useUserLocation';
 
 const DEFAULT_REGION = {
   latitude: 37.7749,
@@ -79,20 +85,28 @@ const getOffsetCoordinates = (games: GameWithDetails[]) => {
 
 export default function MapScreen() {
   const server = React.useMemo(() => new MockGameFacade(), []);
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  
+  // Consume the custom hook, including the loading state for location fetching
+  const { location, fetchLocation, isLoading: isLocationLoading } = useUserLocation();
+  
   const mapRef = React.useRef<any>(null);
   const [games, setGames] = useState<GameWithDetails[]>([]);
-  const [filters, setFilters] = useState<GameFilter>({ latitude: 0, longitude: 0, maxDistance: 0 });
+  const [filters, setFilters] = useState<GameFilter>({ latitude: 0, longitude: 0, maxDistance: 25 });
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [createGameVisible, setCreateGameVisible] = useState(false);
   const [sports, setSports] = useState<Sport[]>([]);
+  
+  // State for data loading and initial load blocking
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
   const [gameToCheckout, setGameToCheckout] = useState<GameWithDetails | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [now, setNow] = useState(new Date());
   const [showLastUpdated, setShowLastUpdated] = useState(false);
   const pillOpacity = React.useRef(new Animated.Value(1)).current;
 
+  // Time tracker for "Last Updated" pill
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(timer);
@@ -114,43 +128,39 @@ export default function MapScreen() {
     }
   }, [lastUpdated, pillOpacity]);
 
+  // React to Location Changes (from the hook)
+  useEffect(() => {
+    if (location) {
+        setFilters(prev => ({ 
+            ...prev, 
+            latitude: location.latitude, 
+            longitude: location.longitude 
+        }));
+
+        if (mapRef.current) {
+            mapRef.current.animateToRegion({
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+            }, 1000);
+        }
+    }
+  }, [location]);
+
   const mapRegion = location
     ? {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+        latitude: location.latitude,
+        longitude: location.longitude,
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
       }
     : DEFAULT_REGION;
 
-  const refreshLocation = async () => {
-    let loc = await Location.getCurrentPositionAsync({});
-    setLocation(loc);
-
-    if (mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      }, 1000);
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        return;
-      }
-
-      let loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc);
-      setFilters(prev => ({ ...prev, latitude: loc.coords.latitude, longitude: loc.coords.longitude, maxDistance: 25 }));
-    })();
-  }, []);
-
   const loadData = useCallback(async () => {
+    // Prevent fetching if we don't have real coordinates yet
+    if (filters.latitude === 0 && filters.longitude === 0) return;
+
     setIsLoading(true);
     try {
       const serverGames = await server.listGames(filters);
@@ -162,6 +172,7 @@ export default function MapScreen() {
       console.error("Failed to refresh games:", error);
     } finally {
       setIsLoading(false);
+      setIsInitialLoad(false); // Turn off the initial load flag forever
     }
   }, [filters, server]);
 
@@ -171,13 +182,13 @@ export default function MapScreen() {
 
   const handleGameCreation = async (gameCreation: GameCreation) => {
     await server.createGame(gameCreation);
+    loadData(); // Refresh list after creating
   }
 
   const handleJoinGame = async (gameId: number) => {
     await server.joinGame(gameId);
     setGameToCheckout(null);
-    const updatedGames = await server.listGames(filters);
-    setGames(updatedGames);
+    loadData(); // Refresh list after joining
   }
 
   const dateFormatter = new Intl.DateTimeFormat('en-US', {
@@ -226,11 +237,14 @@ export default function MapScreen() {
         ))}
       </MapView>
 
-      {isLoading && (
+      {/* Full-screen loading overlay only shows on the very first load */}
+      {(isLoading && isInitialLoad) && (
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingSpinnerContainer}>
             <ActivityIndicator size="large" color="#6366f1" style={{ marginBottom: 16 }} />
-            <Text style={styles.loadingText}>Loading...</Text>
+            <Text style={styles.loadingText}>
+                Loading games...
+            </Text>
           </View>
         </View>
       )}
@@ -244,20 +258,32 @@ export default function MapScreen() {
       )}
 
       <View style={styles.actionPillar}>
-        <Pressable onPress={loadData}>
+        {/* Refresh Button with Spinner */}
+        <Pressable onPress={loadData} disabled={isLoading}>
           <BlurView intensity={65} tint="light" style={styles.glassActionButton}>
-            <Ionicons name="refresh" color="#111827" size={22} />
+            {isLoading && !isInitialLoad ? (
+              <ActivityIndicator size="small" color="#111827" />
+            ) : (
+              <Ionicons name="refresh" color="#111827" size={22} />
+            )}
           </BlurView>
         </Pressable>
+
+        {/* Options Button */}
         <Pressable onPress={() => setFiltersVisible(true)}>
           <BlurView intensity={65} tint="light" style={styles.glassActionButton}>
             <Ionicons name="options-outline" color="#111827" size={22} />
           </BlurView>
         </Pressable>
 
-        <Pressable onPress={refreshLocation}>
+        {/* Locate Button with Spinner */}
+        <Pressable onPress={fetchLocation} disabled={isLocationLoading}>
           <BlurView intensity={65} tint="light" style={styles.glassActionButton}>
-            <Ionicons name="locate" color="#111827" size={22} />
+            {isLocationLoading ? (
+              <ActivityIndicator size="small" color="#111827" />
+            ) : (
+              <Ionicons name="locate" color="#111827" size={22} />
+            )}
           </BlurView>
         </Pressable>
       </View>

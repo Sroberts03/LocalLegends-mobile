@@ -1,33 +1,52 @@
 import { StyleSheet, ScrollView, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useEffect, useState, useMemo } from "react";
-import { useRouter } from "expo-router";
+import React, { useState, useMemo, useCallback } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 import MockProfileFacade from "@/src/server/mock/MockProfileFacade";
-import { ProfileInfo } from "@/src/models/Profile"; // Changed from Profile to ProfileInfo
+import { ProfileInfo } from "@/src/models/Profile"; 
 import UserProfile from "@/src/components/UserProfile";
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [profile, setProfile] = useState<ProfileInfo | null>(null); // Updated Type
+  const [profile, setProfile] = useState<ProfileInfo | null>(null); 
   const server = useMemo(() => new MockProfileFacade(), []);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const profileData = await server.me();
-        setProfile(profileData);
-      } catch (error) {
-        console.error("Failed to fetch profile:", error);
-      }
-    };
-
-    fetchProfile();
+  // 1. Fetch data returning the value, rather than setting state directly
+  const fetchData = useCallback(async () => {
+    try {
+      return await server.me();
+    } catch (error) {
+      console.error("Failed to fetch profile:", error);
+      return null;
+    }
   }, [server]);
+
+  // 2. Correct useFocusEffect syntax (wrapping the logic in useCallback)
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+
+      const loadProfile = async () => {
+        const profileData = await fetchData();
+        
+        // 3. The safe check: Only update state if the user hasn't left the screen yet
+        if (isMounted && profileData) {
+          setProfile(profileData);
+        }
+      };
+
+      loadProfile();
+
+      // Cleanup function runs when the screen loses focus
+      return () => {
+        isMounted = false;
+      };
+    }, [fetchData]) // Dependencies go here inside the useCallback
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* ScrollView needs contentContainerStyle to pad its inside */}
       <View style={styles.headerContainer}>
         <Pressable onPress={() => router.push('/notifications')}>
           <Ionicons name="notifications-outline" size={30} color="#4f46e5" />

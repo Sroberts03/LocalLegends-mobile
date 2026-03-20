@@ -4,8 +4,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import MockGameFacade from '@/src/server/mock/MockGameFacade';
 import GameCard from "@/src/components/GameCard";
 import GameDetailsModal from "@/src/components/GameDetailsModal";
-import { GameWithDetails } from "@/src/models/Game";
+import { GameWithDetails, GameCreation } from "@/src/models/Game";
 import CreateGame from '@/src/components/CreateGame';
+import Sport from "@/src/models/Sport";
 
 export default function MyGamesScreen() {
   const server = React.useMemo(() => new MockGameFacade(), []);

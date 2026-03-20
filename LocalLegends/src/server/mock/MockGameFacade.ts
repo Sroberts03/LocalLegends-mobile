@@ -1,6 +1,7 @@
 import Game, { GameCreation, GameFilter, GameWithDetails, SkillLevel, GenderPreference, AccessType, GameStatus } from "@/src/models/Game";
 import IGameFacade from "../facades/GameFacade";
 import MockDataStore from "./MockDataStore";
+import Profile from "@/src/models/Profile";
 
 export default class MockGameFacade implements IGameFacade {
     calculateDistance(gameLocation: { latitude: number; longitude: number }, userLocation: { latitude: number; longitude: number }): number {
@@ -49,6 +50,26 @@ export default class MockGameFacade implements IGameFacade {
         games = games.filter(g => g.currentPlayerCount < g.maxPlayers);
         games = games.filter(g => g.creatorId !== currentUserId);
         games = games.filter(g => !userGameIds.includes(g.id));
+
+        const memberProfiles: Profile[] = [];
+        const memberIds = new Set<string>();
+        userGames.forEach(gameIds => {
+            gameIds.forEach(id => {
+                if (games.some(g => g.id === id)) {
+                    const userId = Array.from(MockDataStore.userGames.entries()).find(([_, ids]) => ids.includes(id))?.[0];
+                    if (userId) {
+                        memberIds.add(userId);
+                    }
+                }
+            });
+        });
+        memberIds.forEach(id => {
+            const profile = users.get(id);
+            if (profile) {
+                memberProfiles.push(profile);
+            }
+        });
+
         return new Promise(resolve => {
             setTimeout(() => {
                 resolve(games.map(g => {
@@ -58,7 +79,7 @@ export default class MockGameFacade implements IGameFacade {
                         locationName: location.name,
                         sportName: sports.get(g.sportId)!.name,
                         creatorName: users.get(g.creatorId)!.displayName,
-                        memberProfiles: userGames.get(g.id) || [],
+                        memberProfiles: memberProfiles,
                         latitude: location.latitude,
                         longitude: location.longitude,
                         userHasJoined: false
@@ -125,11 +146,16 @@ export default class MockGameFacade implements IGameFacade {
             updatedAt: gameData.updatedAt || new Date()
         };
         MockDataStore.Games.set(newGameId, newGame);
-        MockDataStore.userGames.set(currentUserId, [...(MockDataStore.userGames.get(currentUserId) || []), newGameId]);
+        if (!MockDataStore.userGames.has(currentUserId) || !MockDataStore.userGames.get(currentUserId)!.includes(newGameId)) {
+            MockDataStore.userGames.set(currentUserId, [...(MockDataStore.userGames.get(currentUserId) || []), newGameId]);
+        }
     }
 
     async updateGame(gameData: GameCreation): Promise<void> {
-        const existingGame = MockDataStore.Games.get(gameData.id);
+        let existingGame: Game | undefined;
+        if (gameData.id) {
+            existingGame = MockDataStore.Games.get(gameData.id);
+        }
         const updateAt = new Date();
         if (!existingGame) {
             throw new Error("Game not found");
@@ -139,6 +165,7 @@ export default class MockGameFacade implements IGameFacade {
         }
         gameData.updatedAt = updateAt;
         await this.createGame(gameData);
+        console.log("Games after update:", Array.from(MockDataStore.Games.values()));
     }
 
     async joinGame(gameId: number): Promise<void> {
@@ -165,7 +192,23 @@ export default class MockGameFacade implements IGameFacade {
         const locations = MockDataStore.Locations;
         const sports = MockDataStore.Sports;
         const users = MockDataStore.Users;
-        const userGames = MockDataStore.userGames;
+        const userGames = MockDataStore.userGames
+        const memberProfiles: Profile[] = [];
+        const memberIds = new Set<string>();
+        userGames.forEach(gameIds => {
+            if (gameIds.includes(games[0].id)) {
+                const userId = Array.from(MockDataStore.userGames.entries()).find(([_, ids]) => ids.includes(games[0].id))?.[0];
+                if (userId) {
+                    memberIds.add(userId);
+                }
+            }
+        });
+        memberIds.forEach(id => {
+            const profile = users.get(id);
+            if (profile) {
+                memberProfiles.push(profile);
+            }
+        });
 
         return Promise.resolve(games.map(g => {
             const location = locations.get(g.locationId)!;
@@ -176,7 +219,7 @@ export default class MockGameFacade implements IGameFacade {
                 creatorName: users.get(g.creatorId)!.displayName,
                 latitude: location.latitude,
                 longitude: location.longitude,
-                memberProfiles: userGames.get(g.id) || [],
+                memberProfiles: memberProfiles,
                 userHasJoined: true
             };
         }));
@@ -233,9 +276,6 @@ export default class MockGameFacade implements IGameFacade {
         }
         if (game.accessType === AccessType.Private && MockDataStore.currentUserId === game.creatorId) {
             MockDataStore.Games.set(gameId, { ...game, status: GameStatus.Cancelled });
-        }
-        if (game.creatorId === currentUserId) { 
-            MockDataStore.Games.set(gameId, { ...game, creatorId: MockDataStore.userGames});
         }
     }
 

@@ -1,6 +1,8 @@
 import MockDataStore from "./MockDataStore";
 import IProfileFacade from "../facades/ProfileFacade";
 import { ProfileInfo } from "@/src/models/Profile";
+import Game, { GameWithDetails } from "@/src/models/Game";
+import Sport from "@/src/models/Sport";
 
 export default class MockProfileFacade implements IProfileFacade {
     async me(): Promise<ProfileInfo> {
@@ -20,7 +22,7 @@ export default class MockProfileFacade implements IProfileFacade {
             .filter(game => game.creatorId === currentUserId).length;
 
         // FIX 2: Properly hydrate the GameWithDetails objects
-        // First, get the raw games the user is in
+        // First, get the raw games the user is involved in (either created or joined)
         const rawGames = Array.from(MockDataStore.userGames.get(currentUserId) || [])
             .map(gameId => MockDataStore.Games.get(gameId))
             .filter((game): game is Game => !!game && game.status !== 'draft');
@@ -35,7 +37,10 @@ export default class MockProfileFacade implements IProfileFacade {
                 locationName: location?.name || "Unknown Location",
                 sportName: sport?.name || "Unknown Sport",
                 latitude: location?.latitude || 0,
-                longitude: location?.longitude || 0
+                longitude: location?.longitude || 0,
+                creatorName: MockDataStore.Users.get(game.creatorId)?.displayName || "Unknown Creator",
+                userHasJoined: true,
+                memberProfiles: []
             };
         })
         // Notice we use b.game.createdAt instead of b.createdAt now that it's wrapped

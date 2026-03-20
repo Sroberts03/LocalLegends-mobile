@@ -1,3 +1,5 @@
+import Profile from "./Profile";
+
 export default class Game {
     id: number;
     sportId: number;
@@ -60,7 +62,7 @@ export default class Game {
 }
 
 export class GameCreation {
-    id: number;
+    id?: number;
     sportId?: number;
     googlePlaceId?: string;
     gameName?: string;
@@ -88,6 +90,7 @@ export class GameCreation {
 
     constructor(
         status: GameStatus,
+        id?: number,
         sportId?: number, 
         googlePlaceId?: string, 
         gameName?: string, 
@@ -112,6 +115,7 @@ export class GameCreation {
         createdAt?: Date,
         updatedAt?: Date
     ) {
+        this.id = id;
         this.status = status;
         this.sportId = sportId;
         this.googlePlaceId = googlePlaceId;
@@ -188,4 +192,18 @@ export interface GameWithDetails {
     locationName: string;
     latitude: number;
     longitude: number;
+}
+
+export interface SearchedGame {
+    id: number;
+    name: string;
+    sportName: string;
+    locationName: string;
+    creatorName: string;
+    startTime: Date;
+    endTime: Date;
+    skillLevel: SkillLevel;
+    genderPreference: GenderPreference;
+    currentPlayerCount: number;
+    maxPlayers: number;
 }
