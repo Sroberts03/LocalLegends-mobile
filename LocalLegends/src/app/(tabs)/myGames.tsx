@@ -1,5 +1,5 @@
 import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import { useFocusEffect } from '@react-navigation/native'; 
 import MockGameFacade from '@/src/server/mock/MockGameFacade';
 import GameCard from "@/src/components/GameCard";
@@ -8,11 +8,24 @@ import { GameWithDetails, GameCreation } from "@/src/models/Game";
 import CreateGame from '@/src/components/CreateGame';
 import Sport from "@/src/models/Sport";
 
+// --- TYPE GUARD HELPERS ---
+// These safely check the type so TypeScript stops throwing errors
+const isGameWithDetails = (game: GameWithDetails | GameCreation): game is GameWithDetails => {
+  return (game as GameWithDetails).game !== undefined;
+};
+
+const getStartTime = (game: GameWithDetails | GameCreation): Date | undefined => {
+  if (isGameWithDetails(game)) {
+    return game.game.startTime;
+  }
+  return game.startTime;
+};
+
 export default function MyGamesScreen() {
   const server = React.useMemo(() => new MockGameFacade(), []);
   const [myGames, setMyGames] = React.useState<GameWithDetails[] | GameCreation[]>([]);
   const [gameToCheckout, setGameToCheckout] = React.useState<GameWithDetails | null>(null);
-  const [gameCreation, setGameCreation] = React.useState<GameWithDetails | null>(null);
+  const [gameCreation, setGameCreation] = React.useState<GameCreation | undefined>(undefined);
   const [draftGames, setDraftGames] = React.useState<boolean>(false);
   const [sports, setSports] = React.useState<Sport[]>([]);
 
@@ -57,15 +70,17 @@ export default function MyGamesScreen() {
   };
 
   const handleGamePress = (game: GameWithDetails | GameCreation) => {
-    if (draftGames) {
-      setGameCreation(game);
+    if (draftGames && !isGameWithDetails(game)) {
+      setGameCreation(game as GameCreation);
       return;
     }
-    setGameToCheckout(game);
+    else if (!draftGames && isGameWithDetails(game)) {
+      setGameToCheckout(game);
+    }
   };
 
   const cardId = (game: GameWithDetails | GameCreation) => {
-    if ('game' in game) {
+    if (isGameWithDetails(game)) {
       return game.game.id;
     }
     return game.id;
@@ -80,7 +95,7 @@ export default function MyGamesScreen() {
     try {
       await server.deleteGame(gameId);
       loadMyGames();
-      setGameCreation(null);
+      setGameCreation(undefined);
     } catch (error) {
       console.error("Failed to delete draft:", error);
     }
@@ -136,9 +151,12 @@ export default function MyGamesScreen() {
               const endOfWeek = new Date(today);
               endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
               endOfWeek.setHours(23, 59, 59);
+              
               myGames.forEach(game => {
-                const start = game.game?.startTime || game.startTime;
+                // Safely get start time
+                const start = getStartTime(game);
                 if (!start) return;
+                
                 const startDate = new Date(start);
                 if (startDate >= today && startDate <= endOfToday) {
                   todayGames.push(game);
@@ -148,15 +166,16 @@ export default function MyGamesScreen() {
                   laterGames.push(game);
                 }
               });
+              
               return (
                 <>
                   {todayGames.length > 0 && (
                     <View style={styles.dateSection}>
                       <Text style={styles.dateHeader}>Today</Text>
                       {todayGames.sort((a, b) => {
-                        const aTime = a.game?.startTime || a.startTime;
-                        const bTime = b.game?.startTime || b.startTime;
-                        return new Date(aTime).getTime() - new Date(bTime).getTime();
+                        const aTime = getStartTime(a);
+                        const bTime = getStartTime(b);
+                        return (aTime ? new Date(aTime).getTime() : 0) - (bTime ? new Date(bTime).getTime() : 0);
                       }).map(game => (
                         <GameCard 
                           key={cardId(game)} 
@@ -170,9 +189,9 @@ export default function MyGamesScreen() {
                     <View style={styles.dateSection}>
                       <Text style={styles.dateHeader}>This Week</Text>
                       {weekGames.sort((a, b) => {
-                        const aTime = a.game?.startTime || a.startTime;
-                        const bTime = b.game?.startTime || b.startTime;
-                        return new Date(aTime).getTime() - new Date(bTime).getTime();
+                        const aTime = getStartTime(a);
+                        const bTime = getStartTime(b);
+                        return (aTime ? new Date(aTime).getTime() : 0) - (bTime ? new Date(bTime).getTime() : 0);
                       }).map(game => (
                         <GameCard 
                           key={cardId(game)} 
@@ -186,9 +205,9 @@ export default function MyGamesScreen() {
                     <View style={styles.dateSection}>
                       <Text style={styles.dateHeader}>Later</Text>
                       {laterGames.sort((a, b) => {
-                        const aTime = a.game?.startTime || a.startTime;
-                        const bTime = b.game?.startTime || b.startTime;
-                        return new Date(aTime).getTime() - new Date(bTime).getTime();
+                        const aTime = getStartTime(a);
+                        const bTime = getStartTime(b);
+                        return (aTime ? new Date(aTime).getTime() : 0) - (bTime ? new Date(bTime).getTime() : 0);
                       }).map(game => (
                         <GameCard 
                           key={cardId(game)} 
@@ -216,7 +235,7 @@ export default function MyGamesScreen() {
       <CreateGame
         visible={!!gameCreation}
         existingGame={gameCreation}
-        onClose={() => setGameCreation(null)}
+        onClose={() => setGameCreation(undefined)}
         handleGameCreation={handleGameCreation}
         sports={sports}
       />

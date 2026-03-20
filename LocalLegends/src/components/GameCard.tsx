@@ -11,7 +11,6 @@ type GameCardProps = {
 };
 
 const sportIcon = (sportName: string, status: GameStatus) => {
-  if (status === 'draft') return null;
   if (!sportName) return 'star';
   switch (sportName.toLowerCase()) {
     case 'american football': return 'american-football';
@@ -86,9 +85,11 @@ export default function GameCard({ game, onPress, handleDeleteDraft }: GameCardP
                 <Ionicons name="trash-outline" size={18} color="#ef4444" />
               </Pressable>
             )}
-            <View style={game?.status === 'draft' ? styles.draftIconCircle : styles.iconCircle}>
-              <Ionicons name={sportIcon(game?.sportName, game?.status)} size={24} color="#6366f1" />
-            </View>
+            {!handleDeleteDraft && (
+              <View style={game?.status === 'draft' ? null : styles.iconCircle}>
+                <Ionicons name={sportIcon(game?.sportName, game?.status)} size={24} color="#6366f1" />
+              </View>
+            )}
           </View>
         </View>
       </Pressable>

@@ -1,6 +1,8 @@
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import GameCard from "@/src/components/GameCard";
+import { GameWithDetails } from "../models/Game";
+import { ProfileInfo } from "../models/Profile";
 
 type UserProfileProps = {
     profile: ProfileInfo | null;
@@ -8,7 +10,6 @@ type UserProfileProps = {
 }
 
 const sportIconMap = (sportName: string) => {
-    if (!sportName) return null;
     switch (sportName.toLowerCase()) {
       case 'american football':
         return 'american-football';
@@ -29,7 +30,7 @@ export default function UserProfile({ profile, handleFollow }: UserProfileProps)
       // Map favoriteSports to names if they are objects
       let favoriteSportsNames: string[] = [];
       if (favoriteSports) {
-        favoriteSportsNames = favoriteSports.map(sport => {
+        favoriteSportsNames = favoriteSports.map((sport: { name: any; }) => {
           if (typeof sport === 'string') return sport;
           if (sport && typeof sport === 'object' && sport.name) return sport.name;
           return String(sport);
@@ -89,8 +90,8 @@ export default function UserProfile({ profile, handleFollow }: UserProfileProps)
           <Text style={styles.sectionLabel}>Most Recent Games</Text>
           {mostRecentGames && mostRecentGames.length > 0 ? (
             <View style={styles.gamesList}>
-              {mostRecentGames.map((game, idx) => (
-                <GameCard key={game.id || idx} game={game} onPress={() => {}} />
+              {mostRecentGames.map((game: GameWithDetails, idx: any) => (
+                <GameCard key={game.game.id || idx} game={game} onPress={() => {}} />
               ))}
             </View>
           ) : (
@@ -173,7 +174,6 @@ const styles = StyleSheet.create({
   },
   rightStatDivider: {
     marginRight: -16,
-    leftBorderColor: '#000000',
     borderLeftWidth: 0.5,
     height: '100%',
   },

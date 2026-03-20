@@ -37,8 +37,8 @@ export default function FilterModal({ visible, filters, onClose, onApply, sports
   const [sportIds, setSportIds] = useState<number[]>(filters.sportIds ?? []);
   const [skillLevels, setSkillLevels] = useState<SkillLevel[]>(filters.skillLevels ?? []);
   const [genderPreferences, setGenderPreferences] = useState<GenderPreference[]>(sanitizeGenderPreferences(filters.genderPreferences));
-  const [favoritesOnly, setFavoritesOnly] = useState<boolean>(!!filters.favoritesOnly);
-  const [happeningTodayOnly, setHappeningTodayOnly] = useState<boolean>(!!filters.happeningTodayOnly);
+  const [favoritesOnly, setFavoritesOnly] = useState<boolean | undefined>(!!filters.favoritesOnly);
+  const [happeningTodayOnly, setHappeningTodayOnly] = useState<boolean | undefined>(!!filters.happeningTodayOnly);
   const [maxDistance, setMaxDistance] = useState<number>(filters.maxDistance || DEFAULT_MAX_DISTANCE);  
   
   useEffect(() => {
@@ -63,8 +63,8 @@ export default function FilterModal({ visible, filters, onClose, onApply, sports
       sportIds: sportIds.length > 0 ? sportIds : undefined,
       skillLevels: skillLevels.length > 0 ? skillLevels : undefined,
       genderPreferences: genderPreferences.length > 0 ? genderPreferences : undefined,
-      favoritesOnly,
-      happeningTodayOnly,
+      favoritesOnly : !!favoritesOnly,
+      happeningTodayOnly: !!happeningTodayOnly,
       maxDistance,
     });
   };

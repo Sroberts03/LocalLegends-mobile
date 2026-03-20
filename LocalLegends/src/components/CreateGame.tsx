@@ -332,10 +332,10 @@ export default function CreateGame({ visible, onClose, sports, handleGameCreatio
 
             <View style={styles.row}>
               <View style={styles.rowHalf}>
-                <Field label="Min Players *" value={String(minPlayers)} onChangeText={(v) => setMinPlayers(Number(v) || 0)} keyboardType="number-pad" />
+                <Field label="Min Players *" value={String(minPlayers)} onChangeText={(v: any) => setMinPlayers(Number(v) || 0)} keyboardType="number-pad" />
               </View>
               <View style={styles.rowHalf}>
-                <Field label="Max Players *" value={String(maxPlayers)} onChangeText={(v) => setMaxPlayers(Number(v) || 0)} keyboardType="number-pad" />
+                <Field label="Max Players *" value={String(maxPlayers)} onChangeText={(v: any) => setMaxPlayers(Number(v) || 0)} keyboardType="number-pad" />
               </View>
             </View>
 

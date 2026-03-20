@@ -3,6 +3,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
+
+interface SettingOption {
+  id: string;
+  title: string;
+  description: string;
+  icon: IconName;
+  onPress: () => void;
+}
+
 export default function SettingsScreen() {
   const router = useRouter();
 
@@ -42,7 +52,7 @@ export default function SettingsScreen() {
     console.log("TODO: Implement view privacy policy functionality");
   }
 
-  const accountSettingsOptions = [
+  const accountSettingsOptions: SettingOption[] = [
     {
       id: 'edit-profile',
       title: 'Edit Profile',
@@ -73,7 +83,7 @@ export default function SettingsScreen() {
     }
   ];
 
-  const dangerZoneOptions = [
+  const dangerZoneOptions: SettingOption[] = [
     {
       id: 'logout',
       title: 'Logout',
@@ -90,7 +100,7 @@ export default function SettingsScreen() {
     }
   ];
 
-  const supportOptions = [
+  const supportOptions: SettingOption[] = [
     {
       id: 'report-bug',
       title: 'Report a Bug',
