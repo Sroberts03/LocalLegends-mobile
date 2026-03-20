@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   },
   closeIconButton: {
     top: 45,
-    left: 360,
+    left: 345,
     zIndex: 10,
     borderRadius: 999,
     padding: 6,
