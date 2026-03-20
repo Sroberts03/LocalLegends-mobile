@@ -1,9 +1,10 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import GameCard from "@/src/components/GameCard";
 
 type UserProfileProps = {
     profile: ProfileInfo | null;
+    handleFollow?: () => void;
 }
 
 const sportIconMap = (sportName: string) => {
@@ -20,7 +21,7 @@ const sportIconMap = (sportName: string) => {
     }
   };
 
-export default function UserProfile({ profile }: UserProfileProps) {
+export default function UserProfile({ profile, handleFollow }: UserProfileProps) {
     // Helper for empty states
     const displayName = profile?.profile.displayName || "User";
     const favoriteSports = profile?.favoriteSports;
@@ -42,7 +43,14 @@ export default function UserProfile({ profile }: UserProfileProps) {
           source={{ uri: profile?.profile.profileImageUrl || "https://i.pravatar.cc/300?u=default" }} 
           style={styles.profilePicture} 
         />
-        <Text style={styles.displayName}>{displayName}</Text>
+        <View style={styles.nameRow}>
+            <Text style={styles.displayName}>{displayName}</Text>
+            {handleFollow && (
+            <Pressable onPress={handleFollow}>
+                <Ionicons name="person-add" size={20} color="#4f46e5" />
+            </Pressable>
+            )}
+        </View>
         {/* Favorite Sports */}
         <View>
         {favoriteSportsNames && favoriteSportsNames.length > 0 ? (
@@ -115,6 +123,12 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginBottom: 8,
     textAlign: 'center',
+  },
+  nameRow: {
+    flexDirection: 'row',
+    justifyContent: 'center', 
+    alignItems: 'center',
+    marginBottom: 8,
   },
   bio: {
     fontSize: 16,

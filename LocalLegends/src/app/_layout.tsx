@@ -10,6 +10,12 @@ export default function RootLayout() {
           headerShown: false 
         }} 
       />
+      <Stack.Screen 
+        name="(profileTools)" 
+        options={{ 
+          headerShown: false 
+        }} 
+      />
     </Stack>
   );
 }

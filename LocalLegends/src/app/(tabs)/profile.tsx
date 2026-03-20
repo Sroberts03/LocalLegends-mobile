@@ -1,11 +1,14 @@
-import { SafeAreaView, StyleSheet, ScrollView, View } from "react-native";
+import { StyleSheet, ScrollView, View, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState, useMemo } from "react";
+import { useRouter } from "expo-router";
 import MockProfileFacade from "@/src/server/mock/MockProfileFacade";
 import { ProfileInfo } from "@/src/models/Profile"; // Changed from Profile to ProfileInfo
 import UserProfile from "@/src/components/UserProfile";
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const [profile, setProfile] = useState<ProfileInfo | null>(null); // Updated Type
   const server = useMemo(() => new MockProfileFacade(), []);
 
@@ -26,8 +29,12 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.safeArea}>
       {/* ScrollView needs contentContainerStyle to pad its inside */}
       <View style={styles.headerContainer}>
-        <Ionicons name="notifications-outline" size={30} color="#4f46e5" />
-        <Ionicons name="settings-outline" size={30} color="#4f46e5" />
+        <Pressable onPress={() => router.push('/notifications')}>
+          <Ionicons name="notifications-outline" size={30} color="#4f46e5" />
+        </Pressable>
+        <Pressable onPress={() => router.push('/settings')}>
+          <Ionicons name="settings-outline" size={30} color="#4f46e5" />
+        </Pressable>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <UserProfile profile={profile} />
