@@ -43,7 +43,6 @@ export default function UserProfile({ profile }: UserProfileProps) {
           style={styles.profilePicture} 
         />
         <Text style={styles.displayName}>{displayName}</Text>
-        {profile?.profile.bio && <Text style={styles.bio}>{profile.profile.bio}</Text>}
         {/* Favorite Sports */}
         <View>
         {favoriteSportsNames && favoriteSportsNames.length > 0 ? (
@@ -57,6 +56,7 @@ export default function UserProfile({ profile }: UserProfileProps) {
         ) : (
             <Text style={styles.emptyState}>{`${displayName} hasn't added any favorite sports yet.`}</Text>
         )}
+        {profile?.profile.bio && <Text style={styles.bio}>{profile.profile.bio}</Text>}
         </View>
 
         {/* Stats Grid: Row, below bio */}
@@ -123,6 +123,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     alignSelf: 'center',
     maxWidth: 420,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   statsGrid: {
     flexDirection: 'row',
