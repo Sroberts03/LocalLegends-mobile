@@ -8,12 +8,12 @@ export default class Group {
     createdAt: Date;
 
     constructor(
-        id: number, 
-        name: string, 
-        gameId: number, 
-        status: GroupStatus, 
-        systemMessageId: number, 
-        lastMessageId: number, 
+        id: number,
+        name: string,
+        gameId: number,
+        status: GroupStatus,
+        systemMessageId: number,
+        lastMessageId: number,
         createdAt: Date
     ) {
         this.id = id;

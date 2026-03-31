@@ -46,9 +46,9 @@ class MockDataStore {
         this.Games.set(game6.id, game6);
         this.Games.set(game7.id, game7);
 
-        this.userGames.set("user1", [1,3]);
-        this.userGames.set("user2", [2,4]);
-        this.userGames.set("user3", [3,6,7]);
+        this.userGames.set("user1", [1, 3]);
+        this.userGames.set("user2", [2, 4]);
+        this.userGames.set("user3", [3, 6, 7]);
 
         // Initialize mock location data
         const location1 = new Location(1, "testGoogle", "Mission Playground Basketball Court", "2450 Harrison St", "San Francisco", "California", "94110", "USA", 37.758900, -122.412200);
@@ -66,9 +66,9 @@ class MockDataStore {
         this.Sports.set(sport2.id, sport2);
         this.Sports.set(sport3.id, sport3);
 
-        this.userSports.set("user1", [1,2]);
-        this.userSports.set("user2", [2,3]);
-        this.userSports.set("user3", [1,3]);
+        this.userSports.set("user1", [1, 2]);
+        this.userSports.set("user2", [2, 3]);
+        this.userSports.set("user3", [1, 3]);
     }
 }
 
