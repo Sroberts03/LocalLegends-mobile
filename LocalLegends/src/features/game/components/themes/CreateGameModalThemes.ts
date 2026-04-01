@@ -14,6 +14,7 @@ export const CreateGameModalTheme = StyleSheet.create({
         padding: 24,
         paddingBottom: 40,
         width: '100%',
+        maxHeight: '85%',
     },
     handle: {
         width: 40,
