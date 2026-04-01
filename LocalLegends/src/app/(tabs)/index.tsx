@@ -1,7 +1,7 @@
-import Map from "@/src/features/game/components/Map";
+import GameDiscovery from "@/src/features/game/components/GameDiscovery";
 
 export default function HomeScreen() {
     return (
-        <Map />
+        <GameDiscovery />
     );
 }

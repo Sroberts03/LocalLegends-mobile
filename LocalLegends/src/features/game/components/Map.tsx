@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { COLORS } from '@/src/themes/themes';
 import { Ionicons } from '@expo/vector-icons';
-import { GameWithDetails } from '@/src/models/Game';
+import { GameFilter, GameWithDetails } from '@/src/models/Game';
 import { GameApi } from '../api/GameApi';
 import { getSportIcon } from './utils/MapUtil';
+import { MapThemes } from './themes/MapThemes';
 
 const INITIAL_REGION = {
     latitude: 40.2338,
@@ -20,7 +21,7 @@ export default function Map() {
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [games, setGames] = useState<GameWithDetails[]>([]);
-    const filter = {
+    const filter: GameFilter = {
         latitude: location?.coords.latitude || 0,
         longitude: location?.coords.longitude || 0,
         maxDistance: 10,
@@ -70,17 +71,17 @@ export default function Map() {
 
     if (loading) {
         return (
-            <View style={styles.centerContainer}>
+            <View style={MapThemes.centerContainer}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={styles.loadingText}>Initializing Map...</Text>
+                <Text style={MapThemes.loadingText}>Initializing Map...</Text>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={MapThemes.container}>
             <MapView
-                style={styles.map}
+                style={MapThemes.map}
                 initialRegion={userRegion}
                 showsUserLocation={true}
                 showsPointsOfInterest={false}
@@ -95,66 +96,22 @@ export default function Map() {
                         title={game.game.name}
                         description={game.game.description}
                     >
-                        <View style={styles.markerBadge}>
-                            <Ionicons name={getSportIcon(game.sportName)} size={20} color="#fff" />
+                        <View style={MapThemes.markerContainer}>
+                            <View style={MapThemes.markerBadge}>
+                                <Ionicons name={getSportIcon(game.sportName)} size={20} color="#fff" />
+                            </View>
+                            <View style={MapThemes.markerTail} />
                         </View>
                     </Marker>
                 ))}
             </MapView>
 
             {errorMsg && (
-                <View style={styles.errorBadge}>
-                    <Text style={styles.errorText}>{errorMsg}</Text>
+                <View style={MapThemes.errorBadge}>
+                    <Text style={MapThemes.errorText}>{errorMsg}</Text>
                 </View>
             )}
         </View>
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        width: '100%',
-        height: '100%',
-    },
-    map: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    centerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f8fafc',
-    },
-    loadingText: {
-        marginTop: 12,
-        color: COLORS.textSecondary,
-        fontWeight: '600',
-    },
-    markerBadge: {
-        backgroundColor: COLORS.primary,
-        padding: 6,
-        borderRadius: 20,
-        borderWidth: 2,
-        borderColor: '#fff',
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    errorBadge: {
-        position: 'absolute',
-        top: 50,
-        alignSelf: 'center',
-        backgroundColor: 'rgba(239, 68, 68, 0.9)',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
-    },
-    errorText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 12,
-    },
-});
