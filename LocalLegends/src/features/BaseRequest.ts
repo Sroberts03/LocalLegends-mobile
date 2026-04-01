@@ -9,7 +9,12 @@ export default async function BaseRequest(
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
 
-    const url = `${process.env.EXPO_PUBLIC_BASE_URL}/${endpoint}`;
+    let url = `${process.env.EXPO_PUBLIC_BASE_URL}/${endpoint}`;
+
+    if (method === "GET" && data) {
+        const queryParams = new URLSearchParams(data).toString();
+        url += `?${queryParams}`;
+    }
 
     const options: any = {
         method,
