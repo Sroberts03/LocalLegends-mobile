@@ -3,9 +3,14 @@ import { CreateGameThemes } from "./themes/CreateGameThemes";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "@/src/themes/themes";
 
-export default function CreateGameButton() {
+type CreateGameButtonProps = {
+    setIsCreateGameModalVisible: (isVisible: boolean) => void;
+};
+
+export default function CreateGameButton({ setIsCreateGameModalVisible }: CreateGameButtonProps) {
+    
     const handleCreateGame = () => {
-        console.log("TODO: Implement create game functionality");
+        setIsCreateGameModalVisible(true);
     };
 
     return (
