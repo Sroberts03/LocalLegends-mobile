@@ -106,8 +106,6 @@ export class GameCreation {
         skillLevel: SkillLevel,
         genderPreference: GenderPreference,
         accessType: AccessType,
-        createdAt: Date,
-        updatedAt: Date
     ) {
         this.sportId = sportId;
         this.googlePlaceId = googlePlaceId;

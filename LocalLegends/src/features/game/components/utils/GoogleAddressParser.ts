@@ -8,6 +8,7 @@ export interface ParsedAddress {
     longitude: number;
     locationName: string;
     googlePlaceId: string;
+    locationDescription: string;
 }
 
 export function parseGoogleAddress(data: any, details: any): ParsedAddress {
@@ -42,5 +43,6 @@ export function parseGoogleAddress(data: any, details: any): ParsedAddress {
         longitude: details?.geometry?.location?.lng || 0,
         locationName: data.structured_formatting?.main_text || details?.name || "",
         googlePlaceId: details?.place_id || data.place_id || "",
+        locationDescription: getComponent(["editorialSummary"]) || "",
     };
 }
