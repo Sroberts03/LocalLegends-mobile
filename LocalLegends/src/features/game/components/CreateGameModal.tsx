@@ -32,7 +32,7 @@ export default function CreateGameModal({ isVisible, setIsCreateGameModalVisible
                                 </Pressable>
                             </View>
 
-                            <CreateGameForm />
+                            <CreateGameForm setIsCreateGameModalVisible={setIsCreateGameModalVisible} />
 
                         </View>
                     </TouchableWithoutFeedback>

@@ -4,7 +4,6 @@ export function validateGameCreation(
     name: string, 
     sportId: string,
     locationName: string,
-    locationDescription: string,
     streetAddress: string,
     city: string,
     state: string,

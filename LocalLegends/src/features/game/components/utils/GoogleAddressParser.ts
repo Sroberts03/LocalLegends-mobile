@@ -31,7 +31,30 @@ export function parseGoogleAddress(data: any, details: any): ParsedAddress {
     // Extract street number and route for full street address
     const streetNumber = getComponent(["street_number"]);
     const route = getComponent(["route"]);
-    const streetAddress = `${streetNumber} ${route}`.trim();
+    const intersection = getComponent(["intersection"]);
+    
+    let streetAddress = `${streetNumber} ${route}`.trim();
+
+    // FALLBACK: If standard street number + route is missing or looks incomplete,
+    // use the formatted address to extract intersections or descriptive names
+    if (!streetAddress || (streetAddress === route && !streetNumber)) {
+        const formatted = details?.formatted_address || "";
+        if (formatted) {
+            // Take everything before the first comma (usually the street or intersection)
+            const firstPart = formatted.split(',')[0].trim();
+            // Don't use it if it's identical to the city name (to avoid "Provo, Provo")
+            const cityName = getComponent(["locality"]) || getComponent(["sublocality"]);
+            if (firstPart && firstPart.toLowerCase() !== cityName.toLowerCase()) {
+                streetAddress = firstPart;
+            } else if (route) {
+                streetAddress = route; // Fallback to just route if it exists
+            }
+        } else if (intersection) {
+            streetAddress = intersection;
+        } else if (route) {
+            streetAddress = route;
+        }
+    }
 
     return {
         streetAddress,
@@ -43,6 +66,6 @@ export function parseGoogleAddress(data: any, details: any): ParsedAddress {
         longitude: details?.geometry?.location?.lng || 0,
         locationName: data.structured_formatting?.main_text || details?.name || "",
         googlePlaceId: details?.place_id || data.place_id || "",
-        locationDescription: getComponent(["editorialSummary"]) || "",
+        locationDescription: details?.editorial_summary?.overview || "",
     };
 }

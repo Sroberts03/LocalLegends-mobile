@@ -5,12 +5,13 @@ import { COLORS } from '@/src/themes/themes';
 
 type GooglePlacesInputProps = {
     onLocationSelected: (data: any, details: any) => void;
+    onClear?: () => void;
     placeholder?: string;
 };
 
 const GOOGLE_PLACES_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_PLACES_AI;
 
-export default function GooglePlacesInput({ onLocationSelected, placeholder = "Search for a park or gym..." }: GooglePlacesInputProps) {
+export default function GooglePlacesInput({ onLocationSelected, onClear, placeholder = "Search for a park or gym..." }: GooglePlacesInputProps) {
     if (!GOOGLE_PLACES_API_KEY) {
         return (
             <View style={styles.errorContainer}>
@@ -24,6 +25,11 @@ export default function GooglePlacesInput({ onLocationSelected, placeholder = "S
             placeholder={placeholder}
             onPress={onLocationSelected}
             fetchDetails={true}
+            textInputProps={{
+                onChangeText: (text) => {
+                    if (text === '' && onClear) onClear();
+                }
+            }}
             query={{
                 key: GOOGLE_PLACES_API_KEY,
                 language: 'en',

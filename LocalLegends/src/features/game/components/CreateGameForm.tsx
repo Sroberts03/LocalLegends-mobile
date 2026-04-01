@@ -15,7 +15,11 @@ import { FormToggle } from './form/FormToggle';
 import { ChipSelector } from './form/ChipSelector';
 import { DateTimePickerModal } from './form/DateTimePickerModal';
 
-export default function CreateGameForm() {
+type CreateGameFormProps = {
+    setIsCreateGameModalVisible: (isVisible: boolean) => void;
+};
+
+export default function CreateGameForm({ setIsCreateGameModalVisible }: CreateGameFormProps) {
     const [sportId, setSportId] = useState<string>('');
     const [googlePlaceId, setGooglePlaceId] = useState<string>('');
     const [name, setName] = useState('');
@@ -66,6 +70,27 @@ export default function CreateGameForm() {
         setLocationName(parsed.locationName);
         setGooglePlaceId(parsed.googlePlaceId);
         setLocationDescription(parsed.locationDescription);
+
+        console.log("Location parsed:", {
+            name: parsed.locationName,
+            address: parsed.streetAddress,
+            city: parsed.city,
+            state: parsed.state
+        });
+    };
+
+    const handleLocationCleared = () => {
+        setStreetAddress('');
+        setCity('');
+        setState('');
+        setZipCode('');
+        setCountry('USA');
+        setLatitude(40.2338);
+        setLongitude(-111.6585);
+        setLocationName('');
+        setGooglePlaceId('');
+        setLocationDescription('');
+        console.log("Location cleared - resetting to Provo defaults");
     };
 
     const handleConfirmStartTime = (date: Date) => {
@@ -95,10 +120,47 @@ export default function CreateGameForm() {
         setEndTime(newEndTime);
     };
 
+    const clearFields = () => {
+        setName('');
+        setDescription('');
+        handleLocationCleared();
+        setMaxPlayers(10);
+        setMinPlayers(2);
+        setStartTime(new Date());
+        setEndTime(new Date(Date.now() + 3600000));
+        setIsRecurring(false);
+        setSkillLevel(SkillLevel.All);
+        setGenderPreference(GenderPreference.NoPreference);
+        setAccessType(AccessType.Public);
+    };
+
     const handleCreateGame = async () => {
         setError('');
+        console.log("Creating game with data:", {
+            sportId,
+            googlePlaceId,
+            gameName: name,
+            gameDescription: description,
+            streetAddress,
+            city,
+            state,
+            zipCode,
+            country,
+            latitude,
+            longitude,
+            locationName,
+            locationDescription,
+            maxPlayers,
+            minPlayers,
+            startTime,
+            endTime,
+            isRecurring,
+            skillLevel,
+            genderPreference,
+            accessType
+        });
         const validationError = validateGameCreation(
-            name, sportId, locationName, locationDescription, streetAddress,
+            name, sportId, locationName, streetAddress,
             city, state, zipCode, country, latitude, longitude,
             maxPlayers, minPlayers, startTime, endTime, isRecurring,
             skillLevel, genderPreference, accessType
@@ -117,6 +179,8 @@ export default function CreateGameForm() {
                 locationName, locationDescription, maxPlayers, minPlayers,
                 startTime, endTime, isRecurring, skillLevel, genderPreference, accessType
             });
+            clearFields();
+            setIsCreateGameModalVisible(false);
             Alert.alert("Success", "Game created successfully!");
         } catch (err: any) {
             setError(err.message || "Failed to create game");
@@ -143,13 +207,19 @@ export default function CreateGameForm() {
             <TextInput style={[styles.input, { height: 80 }]} multiline placeholder="What's the vibe?" value={description} onChangeText={setDescription} />
 
             <FormSectionHeader title="Location Search" icon="search-outline" />
-            <GooglePlacesInput onLocationSelected={handleLocationSelected} />
+            <View style={{ zIndex: 10, minHeight: 60 }}>
+                <GooglePlacesInput onLocationSelected={handleLocationSelected} onClear={handleLocationCleared} />
+            </View>
 
-            {streetAddress ? (
+            {(locationName || streetAddress) ? (
                 <View style={{ backgroundColor: '#f0f9ff', padding: 16, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: '#bae6fd' }}>
                     <Text style={[styles.label, { color: COLORS.primary, marginBottom: 4 }]}>Selected Venue</Text>
                     <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#1e3a8a' }}>{locationName}</Text>
-                    <Text style={{ fontSize: 14, color: '#3b82f6' }}>{streetAddress}, {city}, {state} {zipCode}</Text>
+                    {streetAddress ? (
+                        <Text style={{ fontSize: 14, color: '#3b82f6' }}>{streetAddress}, {city}, {state} {zipCode}</Text>
+                    ) : (
+                        <Text style={{ fontSize: 14, color: '#3b82f6' }}>{city}, {state}</Text>
+                    )}
                 </View>
             ) : null}
 
