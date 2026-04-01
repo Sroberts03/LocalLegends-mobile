@@ -1,0 +1,160 @@
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
+import { COLORS } from '@/src/themes/themes';
+import { Ionicons } from '@expo/vector-icons';
+import { GameWithDetails } from '@/src/models/Game';
+import { GameApi } from '../api/GameApi';
+import { getSportIcon } from './utils/MapUtil';
+
+const INITIAL_REGION = {
+    latitude: 40.2338,
+    longitude: -111.6585,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+};
+
+export default function Map() {
+    const [location, setLocation] = useState<Location.LocationObject | null>(null);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [games, setGames] = useState<GameWithDetails[]>([]);
+    const filter = {
+        latitude: location?.coords.latitude || 0,
+        longitude: location?.coords.longitude || 0,
+        maxDistance: 10,
+    };
+
+    useEffect(() => {
+        (async () => {
+            try {
+                let { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== 'granted') {
+                    setErrorMsg('Permission to access location was denied');
+                    setLoading(false);
+                    return;
+                }
+
+                let currentLocation = await Location.getCurrentPositionAsync({});
+                setLocation(currentLocation);
+            } catch (err) {
+                console.error("Error getting location:", err);
+                setErrorMsg('Could not fetch location.');
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, []);
+
+    useEffect(() => {
+        setLoading(true);
+        (async () => {
+            try {
+                const games = await GameApi.getGames({ filter });
+                setGames(games.games);
+            } catch (err) {
+                console.error("Error getting games:", err);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [location]);
+
+    const userRegion = location ? {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+    } : INITIAL_REGION;
+
+    if (loading) {
+        return (
+            <View style={styles.centerContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={styles.loadingText}>Initializing Map...</Text>
+            </View>
+        );
+    }
+
+    return (
+        <View style={styles.container}>
+            <MapView
+                style={styles.map}
+                initialRegion={userRegion}
+                showsUserLocation={true}
+                showsPointsOfInterest={false}
+            >
+                {games.map((game) => (
+                    <Marker
+                        key={game.game.id}
+                        coordinate={{
+                            latitude: game.latitude,
+                            longitude: game.longitude,
+                        }}
+                        title={game.game.name}
+                        description={game.game.description}
+                    >
+                        <View style={styles.markerBadge}>
+                            <Ionicons name={getSportIcon(game.sportName)} size={20} color="#fff" />
+                        </View>
+                    </Marker>
+                ))}
+            </MapView>
+
+            {errorMsg && (
+                <View style={styles.errorBadge}>
+                    <Text style={styles.errorText}>{errorMsg}</Text>
+                </View>
+            )}
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+    },
+    map: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    centerContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f8fafc',
+    },
+    loadingText: {
+        marginTop: 12,
+        color: COLORS.textSecondary,
+        fontWeight: '600',
+    },
+    markerBadge: {
+        backgroundColor: COLORS.primary,
+        padding: 6,
+        borderRadius: 20,
+        borderWidth: 2,
+        borderColor: '#fff',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    errorBadge: {
+        position: 'absolute',
+        top: 50,
+        alignSelf: 'center',
+        backgroundColor: 'rgba(239, 68, 68, 0.9)',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+    },
+    errorText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 12,
+    },
+});
