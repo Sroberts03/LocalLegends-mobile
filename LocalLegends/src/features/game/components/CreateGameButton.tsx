@@ -10,7 +10,7 @@ export default function CreateGameButton() {
 
     return (
         <TouchableOpacity onPress={handleCreateGame} style={CreateGameThemes.createGameButton}>
-            <Ionicons name="add" size={24} color={COLORS.buttonText} />
+            <Ionicons name="add" size={32} color={COLORS.buttonText} />
         </TouchableOpacity>
     );
 }
