@@ -1,3 +1,6 @@
+import Message from "./Messages";
+import Profile from "./Profile";
+
 export default class Group {
     id: number;
     name: string;
@@ -8,12 +11,12 @@ export default class Group {
     createdAt: Date;
 
     constructor(
-        id: number,
-        name: string,
-        gameId: number,
-        status: GroupStatus,
-        systemMessageId: number,
-        lastMessageId: number,
+        id: number, 
+        name: string, 
+        gameId: number, 
+        status: GroupStatus, 
+        systemMessageId: number, 
+        lastMessageId: number, 
         createdAt: Date
     ) {
         this.id = id;
@@ -24,6 +27,14 @@ export default class Group {
         this.lastMessageId = lastMessageId;
         this.createdAt = createdAt;
     }
+}
+
+export interface GroupWithDetails {
+    group: Group;
+    lastMessage: Message;
+    lastMessageRead: Message;
+    unreadCount: number;
+    members: Profile[];
 }
 
 export enum GroupStatus {

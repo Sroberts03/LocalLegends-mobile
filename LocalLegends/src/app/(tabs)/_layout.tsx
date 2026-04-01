@@ -30,34 +30,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Ionicons name="basketball" size={28} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="myGames"
-        options={{
-          title: 'My Games',
-          tabBarIcon: ({ color }) => <Ionicons name="calendar" size={28} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Search',
-          tabBarIcon: ({ color }) => <Ionicons name="search" size={28} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="groups"
-        options={{
-          title: 'Groups',
-          tabBarIcon: ({ color }) => <Ionicons name="people" size={28} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <Ionicons name="person" size={28} color={color} />,
-        }}
-      />
     </Tabs>
   );
 }
