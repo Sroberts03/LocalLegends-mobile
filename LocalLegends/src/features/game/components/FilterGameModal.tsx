@@ -7,6 +7,8 @@ import { GameFilter, SkillLevel, GenderPreference } from "@/src/models/Game";
 import Sport from '@/src/models/Sport';
 import { GameApi } from '../api/GameApi';
 import { FilterGameModalThemes as styles } from "./themes/FilterGameModal";
+import { FilterChip } from './filter/FilterChip';
+import { FilterSection } from './filter/FilterSection';
 
 type FilterGameModalProps = {
     isVisible: boolean;
@@ -35,203 +37,61 @@ export default function FilterGameModal({ isVisible, setIsFilterModalVisible, cu
         }
     };
 
-    const toggleSport = (sportId: string) => {
-        const currentIds = localFilter.sportIds || [];
-        const newIds = currentIds.includes(sportId)
-            ? currentIds.filter(id => id !== sportId)
-            : [...currentIds, sportId];
-        setLocalFilter({ ...localFilter, sportIds: newIds });
+    const toggle = (key: keyof GameFilter, value: any) => {
+        const currentArr = localFilter[key] as any[] || [];
+        const newArr = currentArr.includes(value)
+            ? currentArr.filter(i => i !== value)
+            : [...currentArr, value];
+        setLocalFilter({ ...localFilter, [key]: newArr });
     };
 
-    const toggleSkillLevel = (level: SkillLevel) => {
-        const currentLevels = localFilter.skillLevels || [];
-        const newLevels = currentLevels.includes(level)
-            ? currentLevels.filter(l => l !== level)
-            : [...currentLevels, level];
-        setLocalFilter({ ...localFilter, skillLevels: newLevels });
-    };
-
-    const toggleGenderPreference = (pref: GenderPreference) => {
-        const currentPrefs = localFilter.genderPreferences || [];
-        const newPrefs = currentPrefs.includes(pref)
-            ? currentPrefs.filter(p => p !== pref)
-            : [...currentPrefs, pref];
-        setLocalFilter({ ...localFilter, genderPreferences: newPrefs });
-    };
-
-    const handleApply = () => {
-        onApply(localFilter);
-        setIsFilterModalVisible(false);
-    };
-
+    const handleApply = () => { onApply(localFilter); setIsFilterModalVisible(false); };
     const handleClear = () => {
-        const clearedFilter: GameFilter = {
-            latitude: currentFilter.latitude,
-            longitude: currentFilter.longitude,
-            maxDistance: 25,
-            sportIds: [],
-            skillLevels: [],
-            genderPreferences: [],
-            favoritesOnly: false,
-            happeningTodayOnly: false,
-        };
-        setLocalFilter(clearedFilter);
-        onApply(clearedFilter);
-        setIsFilterModalVisible(false);
+        const cleared: GameFilter = { ...currentFilter, maxDistance: 25, sportIds: [], skillLevels: [], genderPreferences: [], favoritesOnly: false, happeningTodayOnly: false };
+        setLocalFilter(cleared); onApply(cleared); setIsFilterModalVisible(false);
     };
 
     return (
-        <Modal
-            visible={isVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setIsFilterModalVisible(false)}
-        >
+        <Modal visible={isVisible} animationType="slide" transparent onRequestClose={() => setIsFilterModalVisible(false)}>
             <TouchableWithoutFeedback onPress={() => setIsFilterModalVisible(false)}>
                 <View style={styles.modalContainer}>
                     <TouchableWithoutFeedback>
                         <View style={styles.modalContent}>
-                            <View style={styles.handle} />
-                            
-                            <View style={styles.header}>
+                            <View style={styles.handle} /><View style={styles.header}>
                                 <Text style={styles.modalTitle}>Filters</Text>
-                                <TouchableOpacity onPress={() => setIsFilterModalVisible(false)}>
-                                    <Ionicons name="close-circle" size={28} color="#cbd5e0" />
-                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setIsFilterModalVisible(false)}><Ionicons name="close-circle" size={28} color="#cbd5e0" /></TouchableOpacity>
                             </View>
 
                             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
-                                {/* Quick Toggles */}
                                 <View style={[styles.section, { flexDirection: 'row', gap: 16 }]}>
-                                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: 12, borderRadius: 12 }}>
-                                        <Text style={{ fontWeight: '600', color: '#475569' }}>Today</Text>
-                                        <Switch 
-                                            value={localFilter.happeningTodayOnly || false} 
-                                            onValueChange={(val) => setLocalFilter({...localFilter, happeningTodayOnly: val})}
-                                            trackColor={{ false: "#e2e8f0", true: COLORS.primary }}
-                                        />
-                                    </View>
-                                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: 12, borderRadius: 12 }}>
-                                        <Text style={{ fontWeight: '600', color: '#475569' }}>Favorites</Text>
-                                        <Switch 
-                                            value={localFilter.favoritesOnly || false} 
-                                            onValueChange={(val) => setLocalFilter({...localFilter, favoritesOnly: val})}
-                                            trackColor={{ false: "#e2e8f0", true: COLORS.primary }}
-                                        />
-                                    </View>
+                                    {[ { label: 'Today', key: 'happeningTodayOnly' }, { label: 'Favorites', key: 'favoritesOnly' } ].map(({ label, key }) => (
+                                        <View key={key} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: 12, borderRadius: 12 }}>
+                                            <Text style={{ fontWeight: '600', color: '#475569' }}>{label}</Text>
+                                            <Switch value={Boolean(localFilter[key as keyof GameFilter])} onValueChange={(val) => setLocalFilter({...localFilter, [key]: val})} trackColor={{ false: "#e2e8f0", true: COLORS.primary }} />
+                                        </View>
+                                    ))}
                                 </View>
 
-                                {/* Distance Section */}
-                                <View style={styles.section}>
-                                    <View style={styles.sectionHeader}>
-                                        <Text style={styles.sectionTitle}>Distance Range</Text>
-                                        <Text style={styles.sectionValue}>{Math.round(localFilter.maxDistance)} miles</Text>
-                                    </View>
-                                    <Slider
-                                        style={styles.sliderTrack}
-                                        minimumValue={1}
-                                        maximumValue={100}
-                                        step={1}
-                                        value={localFilter.maxDistance}
-                                        onValueChange={(val) => setLocalFilter({ ...localFilter, maxDistance: val })}
-                                        minimumTrackTintColor={COLORS.primary}
-                                        maximumTrackTintColor="#e2e8f0"
-                                        thumbTintColor={COLORS.primary}
-                                    />
-                                </View>
+                                <FilterSection title="Distance Range" value={`${Math.round(localFilter.maxDistance)} miles`}>
+                                    <Slider style={[styles.sliderTrack, { width: '100%' }]} minimumValue={1} maximumValue={50} step={1} value={localFilter.maxDistance} onValueChange={(val) => setLocalFilter({ ...localFilter, maxDistance: val })} minimumTrackTintColor={COLORS.primary} maximumTrackTintColor="#e2e8f0" thumbTintColor={COLORS.primary} />
+                                </FilterSection>
 
-                                {/* Sports Section */}
-                                <View style={styles.section}>
-                                    <Text style={styles.sectionTitle}>Sports</Text>
-                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-                                        {sports.map((sport) => {
-                                            const isActive = localFilter.sportIds?.includes(sport.id);
-                                            return (
-                                                <TouchableOpacity
-                                                    key={sport.id}
-                                                    onPress={() => toggleSport(sport.id)}
-                                                    style={{
-                                                        paddingHorizontal: 16,
-                                                        paddingVertical: 8,
-                                                        borderRadius: 12,
-                                                        backgroundColor: isActive ? COLORS.primary : '#f1f5f9',
-                                                        borderWidth: 1,
-                                                        borderColor: isActive ? COLORS.primary : '#e2e8f0',
-                                                    }}
-                                                >
-                                                    <Text style={{ color: isActive ? '#fff' : '#475569', fontWeight: '600' }}>
-                                                        {sport.name}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            );
-                                        })}
-                                    </View>
-                                </View>
+                                <FilterSection title="Sports">
+                                    {sports.map(s => <FilterChip key={s.id} label={s.name} isActive={Boolean(localFilter.sportIds?.includes(s.id))} onPress={() => toggle('sportIds', s.id)} />)}
+                                </FilterSection>
 
-                                {/* Skill Level Section */}
-                                <View style={styles.section}>
-                                    <Text style={styles.sectionTitle}>Skill Level</Text>
-                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-                                        {Object.values(SkillLevel).map((level) => {
-                                            const isActive = localFilter.skillLevels?.includes(level);
-                                            return (
-                                                <TouchableOpacity
-                                                    key={level}
-                                                    onPress={() => toggleSkillLevel(level)}
-                                                    style={{
-                                                        paddingHorizontal: 16,
-                                                        paddingVertical: 8,
-                                                        borderRadius: 12,
-                                                        backgroundColor: isActive ? COLORS.primary : '#f1f5f9',
-                                                        borderWidth: 1,
-                                                        borderColor: isActive ? COLORS.primary : '#e2e8f0',
-                                                    }}
-                                                >
-                                                    <Text style={{ color: isActive ? '#fff' : '#475569', fontWeight: '600' }}>
-                                                        {level}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            );
-                                        })}
-                                    </View>
-                                </View>
+                                <FilterSection title="Skill Level">
+                                    {Object.values(SkillLevel).map(l => <FilterChip key={l} label={l} isActive={Boolean(localFilter.skillLevels?.includes(l))} onPress={() => toggle('skillLevels', l)} />)}
+                                </FilterSection>
 
-                                {/* Gender Preference Section */}
-                                <View style={styles.section}>
-                                    <Text style={styles.sectionTitle}>Gender Preference</Text>
-                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-                                        {Object.values(GenderPreference).map((pref) => {
-                                            const isActive = localFilter.genderPreferences?.includes(pref);
-                                            return (
-                                                <TouchableOpacity
-                                                    key={pref}
-                                                    onPress={() => toggleGenderPreference(pref)}
-                                                    style={{
-                                                        paddingHorizontal: 16,
-                                                        paddingVertical: 8,
-                                                        borderRadius: 12,
-                                                        backgroundColor: isActive ? COLORS.primary : '#f1f5f9',
-                                                        borderWidth: 1,
-                                                        borderColor: isActive ? COLORS.primary : '#e2e8f0',
-                                                    }}
-                                                >
-                                                    <Text style={{ color: isActive ? '#fff' : '#475569', fontWeight: '600' }}>
-                                                        {pref}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            );
-                                        })}
-                                    </View>
-                                </View>
+                                <FilterSection title="Gender Preference">
+                                    {Object.values(GenderPreference).map(p => <FilterChip key={p} label={p} isActive={Boolean(localFilter.genderPreferences?.includes(p))} onPress={() => toggle('genderPreferences', p)} />)}
+                                </FilterSection>
                             </ScrollView>
 
                             <View style={styles.footerContainer}>
-                                <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
-                                    <Text style={styles.clearButtonText}>Clear All</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-                                    <Text style={styles.applyButtonText}>Apply Filters</Text>
-                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.clearButton} onPress={handleClear}><Text style={styles.clearButtonText}>Clear All</Text></TouchableOpacity>
+                                <TouchableOpacity style={styles.applyButton} onPress={handleApply}><Text style={styles.applyButtonText}>Apply Filters</Text></TouchableOpacity>
                             </View>
                         </View>
                     </TouchableWithoutFeedback>
