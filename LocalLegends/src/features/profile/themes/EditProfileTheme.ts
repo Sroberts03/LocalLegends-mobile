@@ -1,0 +1,103 @@
+import { StyleSheet } from 'react-native';
+import { COLORS, BORDER_RADIUS } from '@/src/themes/themes';
+
+export const editStyles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f8fafc',
+    },
+    scrollContent: {
+        padding: 24,
+        paddingBottom: 100,
+    },
+    avatarSection: {
+        alignItems: 'center',
+        marginVertical: 32,
+    },
+    avatarWrapper: {
+        position: 'relative',
+    },
+    avatar: {
+        width: 140,
+        height: 140,
+        borderRadius: 70,
+        backgroundColor: '#f1f5f9',
+        borderWidth: 4,
+        borderColor: '#ffffff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+    },
+    editBadge: {
+        position: 'absolute',
+        bottom: 4,
+        right: 4,
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: COLORS.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 3,
+        borderColor: '#ffffff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 4,
+    },
+    inputGroup: {
+        marginBottom: 24,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#64748b',
+        marginBottom: 8,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    input: {
+        backgroundColor: '#ffffff',
+        borderRadius: 16,
+        padding: 16,
+        fontSize: 16,
+        color: '#1e293b',
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+    },
+    bioInput: {
+        height: 120,
+        textAlignVertical: 'top',
+        paddingTop: 16,
+    },
+    saveButton: {
+        backgroundColor: COLORS.primary,
+        paddingVertical: 18,
+        borderRadius: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+        marginTop: 16,
+    },
+    saveButtonDisabled: {
+        backgroundColor: '#94a3b8',
+        shadowOpacity: 0,
+    },
+    saveButtonText: {
+        color: '#ffffff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    errorText: {
+        color: '#ef4444',
+        fontSize: 14,
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+});

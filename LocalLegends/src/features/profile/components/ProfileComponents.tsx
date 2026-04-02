@@ -56,7 +56,7 @@ export const ProfileHeader = ({ displayName, profileImageUrl, bio, onEditPress }
                         <Ionicons name="person" size={50} color="rgba(0,0,0,0.1)" />
                     </View>
                 )}
-                <TouchableOpacity style={styles.editBadge} onPress={onEditPress}>
+                <TouchableOpacity style={styles.editBadge} onPress={() => router.push('/editProfile')}>
                     <Ionicons name="pencil" size={16} color="#fff" />
                 </TouchableOpacity>
             </View>

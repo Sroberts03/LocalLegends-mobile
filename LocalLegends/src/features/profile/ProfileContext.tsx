@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { ProfileApi } from './api/ProfileApi';
 import { useAuth } from '@/src/features/auth/AuthContext';
-import { GetProfileResponse } from './profile.types';
+import { EditProfileRequest, EditProfileResponse, GetProfileResponse } from './profile.types';
 
 type ProfileContextType = {
     profile: GetProfileResponse | null;
     isLoading: boolean;
     isInitialLoad: boolean;
     refreshProfile: () => Promise<void>;
+    editProfile: (data: EditProfileRequest) => Promise<EditProfileResponse>;
 };
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -47,12 +48,29 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         refreshProfile();
     }, [userId, refreshProfile]);
 
+    const editProfile = useCallback(async (data: EditProfileRequest): Promise<EditProfileResponse> => {
+        if (!userId) throw new Error("No user ID");
+        
+        setIsLoading(true);
+        try {
+            const res = await ProfileApi.editProfile(data);
+            setProfile(res);
+            return res;
+        } catch (error) {
+            console.error("Error editing profile:", error);
+            throw error;
+        } finally {
+            setIsLoading(false);
+        }
+    }, [userId]);
+
     const value = useMemo(() => ({
         profile,
         isLoading,
         isInitialLoad,
-        refreshProfile
-    }), [profile, isLoading, isInitialLoad, refreshProfile]);
+        refreshProfile,
+        editProfile
+    }), [profile, isLoading, isInitialLoad, refreshProfile, editProfile]);
 
     return (
         <ProfileContext.Provider value={value}>

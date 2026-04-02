@@ -54,6 +54,12 @@ export default {
           locationWhenInUsePermission: "LocalLegends uses your location to show nearby places.",
           locationAlwaysAndWhenInUsePermission: "LocalLegends uses your location to show nearby places."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow LocalLegends to access your photos to set your profile picture."
+        }
       ]
     ],
     experiments: {

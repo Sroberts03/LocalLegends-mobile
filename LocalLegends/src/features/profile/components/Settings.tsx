@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/src/themes/themes';
 import { AuthApi } from '@/src/features/auth/api/AuthApi';
 import { styles } from '@/src/features/profile/themes/SettingsTheme';
+import { useRouter } from 'expo-router';
 
 const SettingRow = ({ 
     icon, 
@@ -52,6 +53,7 @@ const SectionHeader = ({ title }: { title: string }) => (
 export default function Settings() {
     const [pushEnabled, setPushEnabled] = React.useState(true);
     const [darkMode, setDarkMode] = React.useState(false);
+    const router = useRouter();
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -60,7 +62,7 @@ export default function Settings() {
                 <SettingRow 
                     icon="person-outline" 
                     label="Edit Profile" 
-                    onPress={() => {alert("TODO: Edit Profile") }}
+                    onPress={() => {router.push('/editProfile') }}
                 />
                 <SettingRow 
                     icon="shield-checkmark-outline" 
