@@ -70,13 +70,6 @@ export default function CreateGameForm({ setIsCreateGameModalVisible }: CreateGa
         setLocationName(parsed.locationName);
         setGooglePlaceId(parsed.googlePlaceId);
         setLocationDescription(parsed.locationDescription);
-
-        console.log("Location parsed:", {
-            name: parsed.locationName,
-            address: parsed.streetAddress,
-            city: parsed.city,
-            state: parsed.state
-        });
     };
 
     const handleLocationCleared = () => {
@@ -90,7 +83,6 @@ export default function CreateGameForm({ setIsCreateGameModalVisible }: CreateGa
         setLocationName('');
         setGooglePlaceId('');
         setLocationDescription('');
-        console.log("Location cleared - resetting to Provo defaults");
     };
 
     const handleConfirmStartTime = (date: Date) => {
@@ -136,29 +128,6 @@ export default function CreateGameForm({ setIsCreateGameModalVisible }: CreateGa
 
     const handleCreateGame = async () => {
         setError('');
-        console.log("Creating game with data:", {
-            sportId,
-            googlePlaceId,
-            gameName: name,
-            gameDescription: description,
-            streetAddress,
-            city,
-            state,
-            zipCode,
-            country,
-            latitude,
-            longitude,
-            locationName,
-            locationDescription,
-            maxPlayers,
-            minPlayers,
-            startTime,
-            endTime,
-            isRecurring,
-            skillLevel,
-            genderPreference,
-            accessType
-        });
         const validationError = validateGameCreation(
             name, sportId, locationName, streetAddress,
             city, state, zipCode, country, latitude, longitude,
@@ -239,7 +208,6 @@ export default function CreateGameForm({ setIsCreateGameModalVisible }: CreateGa
             <TouchableOpacity 
                 style={styles.dateRow} 
                 onPress={() => {
-                    console.log("Opening Start Time Picker");
                     setActivePickerType('start');
                 }}
             >
@@ -252,7 +220,6 @@ export default function CreateGameForm({ setIsCreateGameModalVisible }: CreateGa
             <TouchableOpacity 
                 style={styles.dateRow} 
                 onPress={() => {
-                    console.log("Opening End Time Picker");
                     setActivePickerType('end');
                 }}
             >

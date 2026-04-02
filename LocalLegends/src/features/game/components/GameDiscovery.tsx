@@ -8,6 +8,7 @@ import * as Location from 'expo-location';
 import ButtonContainer from "./discoveryButtons/ButtonContainer";
 import { GameApi } from "../api/GameApi";
 import Map, { MapRef } from "@/src/features/game/components/Map";
+import FilterGameModal from "./FilterGameModal";
 
 const INITIAL_REGION = {
     latitude: 40.2338,
@@ -26,11 +27,27 @@ export default function GameDiscovery() {
     const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
     const mapRef = useRef<MapRef>(null);
     
+    // Track manually applied filters separately from location
+    const [manualFilters, setManualFilters] = useState<Partial<GameFilter>>({
+        maxDistance: 25,
+        sportIds: [],
+        skillLevels: [],
+        genderPreferences: [],
+        favoritesOnly: false,
+        happeningTodayOnly: false,
+    });
+    
+    // Combine location with manually applied filters
     const filter = useMemo<GameFilter>(() => ({
         latitude: location?.coords.latitude || INITIAL_REGION.latitude,
         longitude: location?.coords.longitude || INITIAL_REGION.longitude,
-        maxDistance: 25,
-    }), [location?.coords.latitude, location?.coords.longitude]);
+        maxDistance: manualFilters.maxDistance || 25,
+        sportIds: manualFilters.sportIds?.length ? manualFilters.sportIds : undefined,
+        skillLevels: manualFilters.skillLevels?.length ? manualFilters.skillLevels : undefined,
+        genderPreferences: manualFilters.genderPreferences?.length ? manualFilters.genderPreferences : undefined,
+        favoritesOnly: manualFilters.favoritesOnly || undefined,
+        happeningTodayOnly: manualFilters.happeningTodayOnly || undefined,
+    }), [location?.coords.latitude, location?.coords.longitude, manualFilters]);
 
     const [isCreateGameModalVisible, setIsCreateGameModalVisible] = useState(false);
 
@@ -42,6 +59,7 @@ export default function GameDiscovery() {
 
         try {
             const gamesResponse = await GameApi.getGames({ filter });
+            
             if (!isCancelledRef.current) {
                 setGames(gamesResponse.games);
                 setIsInitialLoad(false);
@@ -49,7 +67,6 @@ export default function GameDiscovery() {
             }
         } catch (error) {
             if (!isCancelledRef.current) {
-                console.error("Error fetching games:", error);
                 setErrorMsg("Failed to load games");
             }
         } finally {
@@ -75,6 +92,18 @@ export default function GameDiscovery() {
         if (mapRef.current) {
             mapRef.current.refocus();
         }
+    };
+
+    const handleApplyFilters = (newFilters: GameFilter) => {
+        setManualFilters({
+            maxDistance: newFilters.maxDistance,
+            sportIds: newFilters.sportIds,
+            skillLevels: newFilters.skillLevels,
+            genderPreferences: newFilters.genderPreferences,
+            favoritesOnly: newFilters.favoritesOnly,
+            happeningTodayOnly: newFilters.happeningTodayOnly,
+        });
+        setIsFilterModalVisible(false);
     };
 
     useEffect(() => {
@@ -133,6 +162,12 @@ export default function GameDiscovery() {
             <CreateGameModal 
                 isVisible={isCreateGameModalVisible} 
                 setIsCreateGameModalVisible={setIsCreateGameModalVisible} 
+            />
+            <FilterGameModal 
+                isVisible={isFilterModalVisible} 
+                setIsFilterModalVisible={setIsFilterModalVisible} 
+                currentFilter={filter}
+                onApply={handleApplyFilters}
             />
         </View>
     );

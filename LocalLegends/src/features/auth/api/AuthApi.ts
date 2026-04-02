@@ -28,12 +28,10 @@ export const AuthApi = {
 
     async uploadProfilePhoto(uri: string, userId: string): Promise<string> {
         try {
-            console.log("Uploading profile photo for user:", userId);
             const fileName = `${userId}/profile.jpg`;
             const base64 = await FileSystem.readAsStringAsync(uri, {
                 encoding: "base64",
             });
-            console.log("Base64:", base64);
 
             const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
 
@@ -43,8 +41,6 @@ export const AuthApi = {
                     contentType: "image/jpeg",
                     upsert: true,
                 });
-
-            console.log("Upload Data:", data);
 
             if (error) {
                 console.error("Supabase Storage Error Details:", error);
@@ -75,8 +71,6 @@ export const AuthApi = {
                 }
             }
         });
-
-        console.log("Sign up data:", data);
 
         if (error) {
             console.log(error);

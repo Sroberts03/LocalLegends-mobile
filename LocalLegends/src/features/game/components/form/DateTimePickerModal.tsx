@@ -20,7 +20,6 @@ export const DateTimePickerModal: React.FC<DateTimePickerModalProps> = ({
     // Sync temp date with props when modal opens
     React.useEffect(() => {
         if (visible) {
-            console.log(`[Modal] Attempting to open: ${title}`);
             setTempDate(value);
         }
     }, [visible, value]);
