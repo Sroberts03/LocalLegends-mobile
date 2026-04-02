@@ -257,14 +257,8 @@ export const profileThemes = StyleSheet.create({
         marginTop: 12,
         fontSize: 16,
     },
-    editSportsBadge: {
-        position: 'absolute',
-        bottom: 27,
-        right: 210,
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
+    sectionHeader: {
+        flexDirection: 'row',
+        gap: 5,
     },
 });

@@ -11,9 +11,11 @@ import {
     SportsChips, 
     ActivityList 
 } from './ProfileComponents';
+import EditFavoriteSportsModal from './EditFavoriteSportsModal';
 
 export default function Profile() {
     const { profile, isLoading, refreshProfile } = useProfile();
+    const [isEditSportsModalVisible, setIsEditSportsModalVisible] = React.useState(false);
 
     if (isLoading && !profile) {
         return (
@@ -66,12 +68,17 @@ export default function Profile() {
             </View>
 
             {/* Modular Sports List */}
-            <SportsChips sports={profile.favoriteSports} onEditPress={() => alert('TODO: Edit Favorite Sports')} />
+            <SportsChips sports={profile.favoriteSports} onEditPress={() => setIsEditSportsModalVisible(true)} />
 
             {/* Modular Activity List */}
             <ActivityList 
                 games={profile.last5Games} 
                 onGamePress={(id) => console.log('Game Pressed:', id)}
+            />
+
+            <EditFavoriteSportsModal
+                visible={isEditSportsModalVisible}
+                onClose={() => setIsEditSportsModalVisible(false)}
             />
         </ScrollView>
     );
