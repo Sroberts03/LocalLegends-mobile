@@ -5,7 +5,7 @@ import * as Location from 'expo-location';
 import { COLORS } from '@/src/themes/themes';
 import { Ionicons } from '@expo/vector-icons';
 import { GameFilter, GameWithDetails } from '@/src/models/Game';
-import { getSportIcon } from './utils/MapUtil';
+import { getSportIcon } from './utils/SportIcon';
 import { MapThemes } from './themes/MapThemes';
 
 export interface MapRef {
@@ -118,11 +118,11 @@ const Map = forwardRef<MapRef, MapProps>(({
             >
                 {/* 3. Using the new CustomMarker component here */}
                 {games.map((game) => (
-                    <CustomMarker 
-                        key={game.game.id} 
-                        game={game} 
-                        gameLength={games.length} 
-                        onGamePress={onGamePress} 
+                    <CustomMarker
+                        key={game.game.id}
+                        game={game}
+                        gameLength={games.length}
+                        onGamePress={onGamePress}
                     />
                 ))}
             </MapView>

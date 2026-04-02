@@ -5,6 +5,7 @@ import { gameDetailsModalThemes } from "./themes/GameDetailsModalTheme";
 import { GameWithDetails } from "@/src/models/Game";
 import { COLORS } from "@/src/themes/themes";
 import { PlayerAvatar, StatItem } from "./GameDetailsComponents";
+import { getSportIcon } from "./utils/SportIcon";
 
 type GameDetailsModalProps = {
     visible: boolean;
@@ -41,7 +42,7 @@ export default function GameDetailsModal({ visible, onClose, game, onJoin, onLea
                             <View style={gameDetailsModalThemes.heroSection}>
                                 <View style={gameDetailsModalThemes.iconHalo}>
                                     <Ionicons 
-                                        name={game?.sportName ? (game.sportName.toLowerCase().includes('basketball') ? 'basketball' : 'football') : 'trophy'} 
+                                        name={getSportIcon(game?.sportName)} 
                                         size={40} color={COLORS.primary} 
                                     />
                                 </View>
