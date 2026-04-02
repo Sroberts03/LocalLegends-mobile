@@ -1,13 +1,13 @@
-import Map from "@/src/features/game/components/Map";
 import CreateGameButton from "@/src/features/game/components/discoveryButtons/CreateGameButton";
 import { GameDiscoveryTheme } from "./themes/GameDiscoveryTheme";
 import { View } from "react-native";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import CreateGameModal from "./CreateGameModal";
 import { GameFilter, GameWithDetails } from "@/src/models/Game";
 import * as Location from 'expo-location';
 import ButtonContainer from "./discoveryButtons/ButtonContainer";
 import { GameApi } from "../api/GameApi";
+import Map, { MapRef } from "@/src/features/game/components/Map";
 
 const INITIAL_REGION = {
     latitude: 40.2338,
@@ -23,6 +23,7 @@ export default function GameDiscovery() {
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [games, setGames] = useState<GameWithDetails[]>([]);
+    const mapRef = useRef<MapRef>(null);
     
     const filter = useMemo<GameFilter>(() => ({
         latitude: location?.coords.latitude || INITIAL_REGION.latitude,
@@ -69,6 +70,12 @@ export default function GameDiscovery() {
         fetchGames(isCancelledRef);
     };
 
+    const handleRefocus = () => {
+        if (mapRef.current) {
+            mapRef.current.refocus();
+        }
+    };
+
     useEffect(() => {
             (async () => {
                 try {
@@ -94,6 +101,7 @@ export default function GameDiscovery() {
         <View style={GameDiscoveryTheme.container}>
             <View style={GameDiscoveryTheme.map}>
                 <Map 
+                    ref={mapRef}
                     games={games}
                     filter={filter}
                     setGames={setGames}
@@ -110,6 +118,7 @@ export default function GameDiscovery() {
                 <View style={GameDiscoveryTheme.buttonContainer}>
                     <ButtonContainer 
                         onRefresh={handleManualRefresh}
+                        onRefocus={handleRefocus}
                         isLoading={isRefreshing}
                     />
                 </View>

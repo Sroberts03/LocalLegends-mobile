@@ -20,7 +20,7 @@ export const GameDiscoveryTheme = StyleSheet.create({
     },
     buttonContainer: {
         position: 'absolute',
-        top: 100,
-        right: 20,
+        top: 50,
+        right: 10,
     },
 });

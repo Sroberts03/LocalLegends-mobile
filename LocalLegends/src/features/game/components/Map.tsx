@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -8,6 +8,10 @@ import { GameFilter, GameWithDetails } from '@/src/models/Game';
 import { GameApi } from '../api/GameApi';
 import { getSportIcon } from './utils/MapUtil';
 import { MapThemes } from './themes/MapThemes';
+
+export interface MapRef {
+    refocus: () => void;
+}
 
 type MapProps = {
     games: GameWithDetails[];
@@ -27,7 +31,7 @@ type MapProps = {
     };
 }
 
-export default function Map({ 
+const Map = forwardRef<MapRef, MapProps>(({ 
     games, 
     filter, 
     setGames, 
@@ -36,7 +40,21 @@ export default function Map({
     errorMsg,
     location,
     INITIAL_REGION,
- }: MapProps) {
+ }, ref) => {
+    const mapRef = useRef<MapView>(null);
+
+    useImperativeHandle(ref, () => ({
+        refocus: () => {
+            if (mapRef.current && location) {
+                mapRef.current.animateToRegion({
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                    latitudeDelta: 0.015,
+                    longitudeDelta: 0.015,
+                }, 1000);
+            }
+        },
+    }));
 
     const userRegion = location ? {
         latitude: location.coords.latitude,
@@ -57,6 +75,7 @@ export default function Map({
     return (
         <View style={MapThemes.container}>
             <MapView
+                ref={mapRef}
                 style={MapThemes.map}
                 initialRegion={userRegion}
                 showsUserLocation={true}
@@ -89,5 +108,7 @@ export default function Map({
             )}
         </View>
     );
-}
+});
+
+export default Map;
 

@@ -10,7 +10,7 @@ export const ButtonContainerStyles = StyleSheet.create({
         paddingVertical: 12,
     },
     buttonContainer: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         gap: 12,
     },
 });
