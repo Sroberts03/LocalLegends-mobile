@@ -23,6 +23,7 @@ export default function GameDiscovery() {
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [games, setGames] = useState<GameWithDetails[]>([]);
+    const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
     const mapRef = useRef<MapRef>(null);
     
     const filter = useMemo<GameFilter>(() => ({
@@ -120,6 +121,7 @@ export default function GameDiscovery() {
                         onRefresh={handleManualRefresh}
                         onRefocus={handleRefocus}
                         isLoading={isRefreshing}
+                        setIsFilterModalVisible={setIsFilterModalVisible}
                     />
                 </View>
             )}
