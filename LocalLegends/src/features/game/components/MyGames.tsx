@@ -8,6 +8,7 @@ import { MyGamesThemes as styles } from "./themes/MyGamesThemes";
 import { COLORS } from "@/src/themes/themes";
 import { Ionicons } from "@expo/vector-icons";
 import { useGameContext } from "../GameContext";
+import { useRouter } from "expo-router";
 
 type Section = {
     title: string;
@@ -15,6 +16,8 @@ type Section = {
 };
 
 export default function MyGames() {
+    const router = useRouter();
+
     const {
         myGames,
         isLoadingMyGames: isLoading,
@@ -97,6 +100,10 @@ export default function MyGames() {
         );
     }
 
+    const handleFindGame = () => {
+        router.push("/");
+    };
+
     console.log("DEBUG: MyGames Render - isModalVisible:", isModalVisible, "selectedGame:", !!selectedGame);
     return (
         <View style={styles.container}>
@@ -129,7 +136,7 @@ export default function MyGames() {
                         <Text style={styles.emptySubtitle}>
                             Your schedule is looking a bit empty. Ready to hit the court?
                         </Text>
-                        <TouchableOpacity style={styles.findButton}>
+                        <TouchableOpacity style={styles.findButton} onPress={handleFindGame}>
                             <Text style={styles.findButtonText}>Find a Game</Text>
                         </TouchableOpacity>
                     </View>

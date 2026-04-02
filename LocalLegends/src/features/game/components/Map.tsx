@@ -31,31 +31,49 @@ type MapProps = {
     onGamePress?: (game: GameWithDetails) => void;
 }
 
-// 1. The new wrapper component to handle the Android rendering bug
-const CustomMarker = ({ game, gameLength, onGamePress }: { game: GameWithDetails, gameLength: number, onGamePress?: (game: GameWithDetails) => void }) => {
+// 1. The wrapper component with jitter logic
+const CustomMarker = ({ 
+    game, 
+    gameLength, 
+    onGamePress, 
+    indexInGroup = 0, 
+    totalInGroup = 1 
+}: { 
+    game: GameWithDetails, 
+    gameLength: number, 
+    onGamePress?: (game: GameWithDetails) => void,
+    indexInGroup?: number,
+    totalInGroup?: number
+}) => {
     const [trackChanges, setTrackChanges] = useState(true);
 
     useEffect(() => {
-        // Give the icon 500ms to load into memory, then lock the snapshot
         const timer = setTimeout(() => setTrackChanges(false), 500);
         return () => clearTimeout(timer);
     }, []);
 
-    // Guard against null coordinates just in case
     if (!game.latitude || !game.longitude) return null;
+
+    // Apply jitter if there are multiple games at this exact location
+    const COORD_OFFSET = 0.00018; // Small enough to be at the same park, large enough to see markers
+    let lat = Number(game.latitude);
+    let lng = Number(game.longitude);
+
+    if (totalInGroup > 1) {
+        // Spread markers in a small circle around the center point
+        const angle = (2 * Math.PI * indexInGroup) / totalInGroup;
+        lat += COORD_OFFSET * Math.cos(angle);
+        lng += COORD_OFFSET * Math.sin(angle);
+    }
 
     return (
         <Marker
             key={`${game.game.id}-${gameLength}`}
             identifier={`${game.game.id}-${gameLength}`}
-            coordinate={{
-                latitude: Number(game.latitude),
-                longitude: Number(game.longitude),
-            }}
-            title={game.game.name}
-            description={game.game.description}
+            coordinate={{ latitude: lat, longitude: lng }}
             tracksViewChanges={trackChanges}
             onCalloutPress={() => onGamePress?.(game)}
+            onPress={() => onGamePress?.(game)}
         >
             <View style={MapThemes.markerContainer}>
                 <View style={MapThemes.markerBadge}>
@@ -98,6 +116,17 @@ const Map = forwardRef<MapRef, MapProps>(({
         longitudeDelta: 0.05,
     } : INITIAL_REGION;
 
+    // Group games by coordinates to detect overlaps
+    const groupedGames = React.useMemo(() => {
+        const groups: Record<string, GameWithDetails[]> = {};
+        games.forEach(game => {
+            const key = `${game.latitude}-${game.longitude}`;
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(game);
+        });
+        return groups;
+    }, [games]);
+
     if (loading) {
         return (
             <View style={MapThemes.centerContainer}>
@@ -116,15 +145,18 @@ const Map = forwardRef<MapRef, MapProps>(({
                 showsUserLocation={true}
                 showsPointsOfInterest={false}
             >
-                {/* 3. Using the new CustomMarker component here */}
-                {games.map((game) => (
-                    <CustomMarker
-                        key={game.game.id}
-                        game={game}
-                        gameLength={games.length}
-                        onGamePress={onGamePress}
-                    />
-                ))}
+                {Object.values(groupedGames).flatMap((group) => 
+                    group.map((game, index) => (
+                        <CustomMarker
+                            key={`${game.game.id}-${games.length}`}
+                            game={game}
+                            gameLength={games.length}
+                            onGamePress={onGamePress}
+                            indexInGroup={index}
+                            totalInGroup={group.length}
+                        />
+                    ))
+                )}
             </MapView>
 
             {errorMsg && (
