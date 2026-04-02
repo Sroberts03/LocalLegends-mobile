@@ -1,6 +1,6 @@
 import Sport from "@/src/models/Sport";
 import BaseRequest from "../../BaseRequest";
-import { GetGamesReq, GetGamesRes, GetSportsRes } from "../Game.types";
+import { GetGamesReq, GetGamesRes, GetSportsRes, JoinGameReq, JoinGameRes } from "../Game.types";
 import Game, { GameCreation } from "@/src/models/Game";
 
 export const GameApi = {
@@ -18,5 +18,13 @@ export const GameApi = {
 
     async getMyGames(): Promise<GetGamesRes> {
         return await BaseRequest("GET", {}, "games/my-games");
+    },
+
+    async joinGame(req: JoinGameReq): Promise<JoinGameRes> {
+        return await BaseRequest("POST", req, "games/join-game");
+    },
+
+    async leaveGame(req: JoinGameReq): Promise<JoinGameRes> {
+        return await BaseRequest("DELETE", req, "games/leave-game");
     }
 }

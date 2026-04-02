@@ -1,7 +1,7 @@
 import Profile from "./Profile";
 
 export default class Game {
-    id: number;
+    id: string;
     sportId: string;
     creatorId: string;
     locationId: string;
@@ -21,7 +21,7 @@ export default class Game {
     updatedAt: Date;
 
     constructor(
-        id: number, 
+        id: string, 
         sportId: string, 
         creatorId: string, 
         locationId: string, 

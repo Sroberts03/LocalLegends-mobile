@@ -3,6 +3,7 @@ import { View, Text, SectionList, ActivityIndicator, RefreshControl, TouchableOp
 import { GameApi } from "../api/GameApi";
 import { GameWithDetails } from "@/src/models/Game";
 import GameCard from "./GameCard";
+import GameDetailsModal from "./GameDetailsModal";
 import { MyGamesThemes as styles } from "./themes/MyGamesThemes";
 import { COLORS } from "@/src/themes/themes";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,6 +17,10 @@ export default function MyGames() {
     const [myGames, setMyGames] = useState<GameWithDetails[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    
+    // Modal State
+    const [selectedGame, setSelectedGame] = useState<GameWithDetails | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
     const fetchMyGames = async (showLoading = true) => {
         if (showLoading) setIsLoading(true);
@@ -45,6 +50,32 @@ export default function MyGames() {
     const onRefresh = () => {
         setIsRefreshing(true);
         fetchMyGames(false);
+    };
+
+    const handleGameCardPress = (game: GameWithDetails) => {
+        console.log("DEBUG: Game Card Clicked:", game.game.name);
+        setSelectedGame(game);
+        setIsModalVisible(true);
+    };
+
+    const handleJoin = async () => {
+        if (!selectedGame) return;
+        try {
+            await GameApi.joinGame({ gameId: selectedGame.game.id });
+            fetchMyGames(false);
+        } catch (error) {
+            console.log("Error joining game:", error);
+        }
+    };
+
+    const handleLeave = async () => {
+        if (!selectedGame) return;
+        try {
+            await GameApi.leaveGame({ gameId: selectedGame.game.id });
+            fetchMyGames(false);
+        } catch (error) {
+            console.log("Error leaving game:", error);
+        }
     };
 
     const groupedGames = useMemo(() => {
@@ -92,12 +123,18 @@ export default function MyGames() {
         );
     }
 
+    console.log("DEBUG: MyGames Render - isModalVisible:", isModalVisible, "selectedGame:", !!selectedGame);
     return (
         <View style={styles.container}>
             <SectionList
                 sections={groupedGames}
                 keyExtractor={(item) => item.game.id.toString()}
-                renderItem={({ item }) => <GameCard data={item} />}
+                renderItem={({ item }) => (
+                    <GameCard 
+                        data={item} 
+                        onPress={() => handleGameCardPress(item)} 
+                    />
+                )}
                 renderSectionHeader={({ section: { title } }) => (
                     <Text style={styles.sectionHeader}>{title}</Text>
                 )}
@@ -123,6 +160,14 @@ export default function MyGames() {
                         </TouchableOpacity>
                     </View>
                 )}
+            />
+
+            <GameDetailsModal
+                visible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
+                game={selectedGame!}
+                onJoin={handleJoin}
+                onLeave={handleLeave}
             />
         </View>
     );

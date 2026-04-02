@@ -5,6 +5,7 @@ export const MyGamesThemes = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.backgroundPrimary,
+        paddingBottom: 50,
     },
     listContent: {
         padding: SPACING.md,

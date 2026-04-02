@@ -28,10 +28,11 @@ type MapProps = {
         latitudeDelta: number;
         longitudeDelta: number;
     };
+    onGamePress?: (game: GameWithDetails) => void;
 }
 
 // 1. The new wrapper component to handle the Android rendering bug
-const CustomMarker = ({ game, gameLength }: { game: GameWithDetails, gameLength: number }) => {
+const CustomMarker = ({ game, gameLength, onGamePress }: { game: GameWithDetails, gameLength: number, onGamePress?: (game: GameWithDetails) => void }) => {
     const [trackChanges, setTrackChanges] = useState(true);
 
     useEffect(() => {
@@ -54,6 +55,7 @@ const CustomMarker = ({ game, gameLength }: { game: GameWithDetails, gameLength:
             title={game.game.name}
             description={game.game.description}
             tracksViewChanges={trackChanges}
+            onCalloutPress={() => onGamePress?.(game)}
         >
             <View style={MapThemes.markerContainer}>
                 <View style={MapThemes.markerBadge}>
@@ -72,6 +74,7 @@ const Map = forwardRef<MapRef, MapProps>(({
     errorMsg,
     location,
     INITIAL_REGION,
+    onGamePress,
 }, ref) => {
     const mapRef = useRef<MapView>(null);
 
@@ -115,7 +118,12 @@ const Map = forwardRef<MapRef, MapProps>(({
             >
                 {/* 3. Using the new CustomMarker component here */}
                 {games.map((game) => (
-                    <CustomMarker key={game.game.id} game={game} gameLength={games.length} />
+                    <CustomMarker 
+                        key={game.game.id} 
+                        game={game} 
+                        gameLength={games.length} 
+                        onGamePress={onGamePress} 
+                    />
                 ))}
             </MapView>
 

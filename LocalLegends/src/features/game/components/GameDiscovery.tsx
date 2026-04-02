@@ -9,6 +9,7 @@ import ButtonContainer from "./discoveryButtons/ButtonContainer";
 import { GameApi } from "../api/GameApi";
 import Map, { MapRef } from "@/src/features/game/components/Map";
 import FilterGameModal from "./FilterGameModal";
+import GameDetailsModal from "./GameDetailsModal";
 
 const INITIAL_REGION = {
     latitude: 40.2338,
@@ -36,6 +37,10 @@ export default function GameDiscovery() {
         favoritesOnly: false,
         happeningTodayOnly: false,
     });
+    
+    // MODAL STATE
+    const [selectedGame, setSelectedGame] = useState<GameWithDetails | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
     
     // Combine location with manually applied filters
     const filter = useMemo<GameFilter>(() => ({
@@ -106,6 +111,33 @@ export default function GameDiscovery() {
         setIsFilterModalVisible(false);
     };
 
+    const handleMarkerPress = (game: GameWithDetails) => {
+        setSelectedGame(game);
+        setIsModalVisible(true);
+    };
+
+    const handleJoin = async () => {
+        if (!selectedGame) return;
+        try {
+            await GameApi.joinGame({ gameId: selectedGame.game.id });
+            // Refresh to update player counts
+            handleManualRefresh();
+        } catch (error) {
+            console.error("Failed to join game:", error);
+        }
+    };
+
+    const handleLeave = async () => {
+        if (!selectedGame) return;
+        try {
+            await GameApi.leaveGame({ gameId: selectedGame.game.id });
+            // Refresh to update player counts
+            handleManualRefresh();
+        } catch (error) {
+            console.error("Failed to leave game:", error);
+        }
+    };
+
     useEffect(() => {
             (async () => {
                 try {
@@ -142,6 +174,7 @@ export default function GameDiscovery() {
                     location={location}
                     setLocation={setLocation}
                     INITIAL_REGION={INITIAL_REGION}
+                    onGamePress={handleMarkerPress}
                 />
             </View>
             {!isInitialLoad && (
@@ -168,6 +201,14 @@ export default function GameDiscovery() {
                 setIsFilterModalVisible={setIsFilterModalVisible} 
                 currentFilter={filter}
                 onApply={handleApplyFilters}
+            />
+
+            <GameDetailsModal
+                visible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
+                game={selectedGame!}
+                onJoin={handleJoin}
+                onLeave={handleLeave}
             />
         </View>
     );

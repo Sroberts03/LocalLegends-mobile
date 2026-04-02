@@ -13,10 +13,18 @@ type GameCardProps = {
 
 export default function GameCard({ data, onPress }: GameCardProps) {
     const startTime = new Date(data.game.startTime);
-    const timeString = startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const endTime = new Date(data.game.endTime);
+    const timeString = `${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     
     return (
-        <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity 
+            style={styles.card} 
+            onPress={() => {
+                console.log("DEBUG: Card Touchable - Game:", data.game.name);
+                onPress?.();
+            }} 
+            activeOpacity={0.7}
+        >
             <View style={styles.iconContainer}>
                 <Ionicons 
                     name={getSportIcon(data.sportName)} 

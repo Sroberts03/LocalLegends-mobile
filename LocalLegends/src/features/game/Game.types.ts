@@ -18,4 +18,13 @@ export interface CreateGameRes {
 }
 
 export interface CreateGamesReq extends GameCreation { }
+
+export interface JoinGameReq {
+    gameId: string;
+}
+
+export interface JoinGameRes {
+    success: boolean;
+    message: string;
+}
     
