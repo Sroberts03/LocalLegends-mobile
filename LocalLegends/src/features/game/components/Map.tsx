@@ -5,7 +5,6 @@ import * as Location from 'expo-location';
 import { COLORS } from '@/src/themes/themes';
 import { Ionicons } from '@expo/vector-icons';
 import { GameFilter, GameWithDetails } from '@/src/models/Game';
-import { GameApi } from '../api/GameApi';
 import { getSportIcon } from './utils/MapUtil';
 import { MapThemes } from './themes/MapThemes';
 
@@ -31,16 +30,49 @@ type MapProps = {
     };
 }
 
-const Map = forwardRef<MapRef, MapProps>(({ 
-    games, 
-    filter, 
-    setGames, 
-    loading, 
-    setLoading, 
+// 1. The new wrapper component to handle the Android rendering bug
+const CustomMarker = ({ game, gameLength }: { game: GameWithDetails, gameLength: number }) => {
+    const [trackChanges, setTrackChanges] = useState(true);
+
+    useEffect(() => {
+        // Give the icon 500ms to load into memory, then lock the snapshot
+        const timer = setTimeout(() => setTrackChanges(false), 500);
+        return () => clearTimeout(timer);
+    }, []);
+
+    // Guard against null coordinates just in case
+    if (!game.latitude || !game.longitude) return null;
+
+    return (
+        <Marker
+            key={`${game.game.id}-${gameLength}`}
+            identifier={`${game.game.id}-${gameLength}`}
+            coordinate={{
+                latitude: Number(game.latitude),
+                longitude: Number(game.longitude),
+            }}
+            title={game.game.name}
+            description={game.game.description}
+            tracksViewChanges={trackChanges}
+        >
+            <View style={MapThemes.markerContainer}>
+                <View style={MapThemes.markerBadge}>
+                    <Ionicons name={getSportIcon(game.sportName)} size={20} color="#fff" />
+                </View>
+                <View style={MapThemes.markerTail} />
+            </View>
+        </Marker>
+    );
+};
+
+// 2. Your main Map component
+const Map = forwardRef<MapRef, MapProps>(({
+    games,
+    loading,
     errorMsg,
     location,
     INITIAL_REGION,
- }, ref) => {
+}, ref) => {
     const mapRef = useRef<MapView>(null);
 
     useImperativeHandle(ref, () => ({
@@ -81,23 +113,9 @@ const Map = forwardRef<MapRef, MapProps>(({
                 showsUserLocation={true}
                 showsPointsOfInterest={false}
             >
+                {/* 3. Using the new CustomMarker component here */}
                 {games.map((game) => (
-                    <Marker
-                        key={game.game.id}
-                        coordinate={{
-                            latitude: game.latitude,
-                            longitude: game.longitude,
-                        }}
-                        title={game.game.name}
-                        description={game.game.description}
-                    >
-                        <View style={MapThemes.markerContainer}>
-                            <View style={MapThemes.markerBadge}>
-                                <Ionicons name={getSportIcon(game.sportName)} size={20} color="#fff" />
-                            </View>
-                            <View style={MapThemes.markerTail} />
-                        </View>
-                    </Marker>
+                    <CustomMarker key={game.game.id} game={game} gameLength={games.length} />
                 ))}
             </MapView>
 
@@ -111,4 +129,3 @@ const Map = forwardRef<MapRef, MapProps>(({
 });
 
 export default Map;
-

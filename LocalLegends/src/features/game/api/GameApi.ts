@@ -5,7 +5,9 @@ import Game, { GameCreation } from "@/src/models/Game";
 
 export const GameApi = {
     async getGames(req: GetGamesReq): Promise<GetGamesRes> {
-        return await BaseRequest("GET", req.filter, "games/list-games");
+        const res = await BaseRequest("GET", req.filter, "games/list-games");
+        console.log("getGames res", JSON.stringify(res, null, 2));
+        return res;
     },
 
     async createGame(gameData: GameCreation): Promise<Game> {
