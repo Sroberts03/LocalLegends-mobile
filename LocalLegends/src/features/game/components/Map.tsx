@@ -9,58 +9,34 @@ import { GameApi } from '../api/GameApi';
 import { getSportIcon } from './utils/MapUtil';
 import { MapThemes } from './themes/MapThemes';
 
-const INITIAL_REGION = {
-    latitude: 40.2338,
-    longitude: -111.6585,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-};
-
-export default function Map() {
-    const [location, setLocation] = useState<Location.LocationObject | null>(null);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [games, setGames] = useState<GameWithDetails[]>([]);
-    const filter: GameFilter = {
-        latitude: location?.coords.latitude || 0,
-        longitude: location?.coords.longitude || 0,
-        maxDistance: 10,
+type MapProps = {
+    games: GameWithDetails[];
+    filter: GameFilter;
+    setGames: (games: GameWithDetails[]) => void;
+    loading: boolean;
+    setLoading: (loading: boolean) => void;
+    errorMsg: string | null;
+    setErrorMsg: (errorMsg: string | null) => void;
+    location: Location.LocationObject | null;
+    setLocation: (location: Location.LocationObject | null) => void;
+    INITIAL_REGION: {
+        latitude: number;
+        longitude: number;
+        latitudeDelta: number;
+        longitudeDelta: number;
     };
+}
 
-    useEffect(() => {
-        (async () => {
-            try {
-                let { status } = await Location.requestForegroundPermissionsAsync();
-                if (status !== 'granted') {
-                    setErrorMsg('Permission to access location was denied');
-                    setLoading(false);
-                    return;
-                }
-
-                let currentLocation = await Location.getCurrentPositionAsync({});
-                setLocation(currentLocation);
-            } catch (err) {
-                console.error("Error getting location:", err);
-                setErrorMsg('Could not fetch location.');
-            } finally {
-                setLoading(false);
-            }
-        })();
-    }, []);
-
-    useEffect(() => {
-        setLoading(true);
-        (async () => {
-            try {
-                const games = await GameApi.getGames({ filter });
-                setGames(games.games);
-            } catch (err) {
-                console.error("Error getting games:", err);
-            } finally {
-                setLoading(false);
-            }
-        })();
-    }, [location]);
+export default function Map({ 
+    games, 
+    filter, 
+    setGames, 
+    loading, 
+    setLoading, 
+    errorMsg,
+    location,
+    INITIAL_REGION,
+ }: MapProps) {
 
     const userRegion = location ? {
         latitude: location.coords.latitude,
