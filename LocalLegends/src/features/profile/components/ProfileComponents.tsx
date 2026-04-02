@@ -57,7 +57,7 @@ export const ProfileHeader = ({ displayName, profileImageUrl, bio, onEditPress }
                     </View>
                 )}
                 <TouchableOpacity style={styles.editBadge} onPress={onEditPress}>
-                    <Ionicons name="camera" size={16} color="#fff" />
+                    <Ionicons name="pencil" size={16} color="#fff" />
                 </TouchableOpacity>
             </View>
             <Text style={styles.name}>{displayName || 'Legendary Player'}</Text>
@@ -70,9 +70,12 @@ export const ProfileHeader = ({ displayName, profileImageUrl, bio, onEditPress }
 };
 
 // 3. Favorite Sports Chips Component
-export const SportsChips = ({ sports }: { sports: Sport[] }) => (
+export const SportsChips = ({ sports, onEditPress }: { sports: Sport[], onEditPress: () => void }) => (
     <View style={styles.section}>
         <Text style={styles.sectionTitle}>Favorite Sports</Text>
+        <TouchableOpacity style={styles.editSportsBadge} onPress={onEditPress}>
+            <Ionicons name="create-outline" size={18} color="#000000ff" />
+        </TouchableOpacity>
         <View style={styles.sportsList}>
             {sports && sports.length > 0 ? (
                 sports.map((sport) => (

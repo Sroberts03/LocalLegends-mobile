@@ -55,7 +55,7 @@ export default function Profile() {
                 displayName={profile.displayName}
                 profileImageUrl={profile.profileImageUrl}
                 bio={profile.bio}
-                onEditPress={() => console.log('Edit Profile Pressed')}
+                onEditPress={() => alert('TODO: Edit Profile Photo')}
             />
 
             {/* Modular Stats */}
@@ -66,7 +66,7 @@ export default function Profile() {
             </View>
 
             {/* Modular Sports List */}
-            <SportsChips sports={profile.favoriteSports} />
+            <SportsChips sports={profile.favoriteSports} onEditPress={() => alert('TODO: Edit Favorite Sports')} />
 
             {/* Modular Activity List */}
             <ActivityList 
