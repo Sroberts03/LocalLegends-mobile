@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { GameWithDetails, GameFilter } from '@/src/models/Game';
 import { GameApi } from './api/GameApi';
 import * as Location from 'expo-location';
+import { useAuth } from '@/src/features/auth/AuthContext';
 
 type GameContextType = {
     // Discovery
@@ -45,6 +46,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const [isInitialLoadMyGames, setIsInitialLoadMyGames] = useState(true);
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const { session } = useAuth();
+    const userId = session?.user?.id;
 
     const [filters, setFilters] = useState<GameFilter>({
         latitude: INITIAL_REGION.latitude,
@@ -85,9 +88,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     // 2. Fetch Discovery Games
     const refreshDiscovery = useCallback(async () => {
-        // Guard: Don't search if coordinates are invalid
-        if (isNaN(filters.latitude) || isNaN(filters.longitude)) {
-            console.log("DEBUG: Context - Skipping Discovery, invalid coordinates");
+        // Guard: Don't search if coordinates are invalid or user is logged out
+        if (!userId || isNaN(filters.latitude) || isNaN(filters.longitude)) {
+            console.log("DEBUG: Context - Skipping Discovery, invalid coordinates or no user");
             return;
         }
 
@@ -114,10 +117,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         } finally {
             setIsLoadingDiscovery(false);
         }
-    }, [filters]);
+    }, [filters, userId]);
 
     // 3. Fetch My Games
     const refreshMyGames = useCallback(async () => {
+        if (!userId) return;
         setIsLoadingMyGames(true);
         try {
             const res = await GameApi.getMyGames();
@@ -133,16 +137,36 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         } finally {
             setIsLoadingMyGames(false);
         }
-    }, []);
+    }, [userId]);
 
-    // 4. Initial Fetches
+    // 4. Session-Aware Management
     useEffect(() => {
-        refreshDiscovery();
-    }, [refreshDiscovery]);
+        if (!userId) {
+            console.log("DEBUG: Context - User logged out, clearing state");
+            setDiscoveryGames([]);
+            setMyGames([]);
+            setIsInitialLoadDiscovery(true);
+            setIsInitialLoadMyGames(true);
+            setFilters(prev => ({
+                ...prev,
+                sportIds: [],
+                skillLevels: [],
+                genderPreferences: [],
+                favoritesOnly: false,
+                happeningTodayOnly: false,
+            }));
+        }
+    }, [userId]);
 
+    // Triggers discovery refresh when user changes OR filters change
     useEffect(() => {
-        refreshMyGames();
-    }, [refreshMyGames]);
+        if (userId) refreshDiscovery();
+    }, [userId, refreshDiscovery]);
+
+    // Triggers myGames refresh when user changes
+    useEffect(() => {
+        if (userId) refreshMyGames();
+    }, [userId, refreshMyGames]);
 
     // 5. Participation Actions
     const joinGame = useCallback(async (gameId: string) => {
