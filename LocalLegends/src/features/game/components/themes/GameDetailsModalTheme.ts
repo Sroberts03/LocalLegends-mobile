@@ -214,6 +214,11 @@ export const gameDetailsModalThemes = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
     },
+    avatarImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 25,
+    },
     playerName: {
         fontSize: 12,
         fontWeight: '600',

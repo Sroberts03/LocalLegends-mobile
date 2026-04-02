@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Modal, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Modal, ActivityIndicator, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { gameDetailsModalThemes } from "./themes/GameDetailsModalTheme";
 import { GameWithDetails } from "@/src/models/Game";
@@ -17,19 +17,19 @@ export default function GameDetailsModal({ visible, onClose, game, onJoin, onLea
 
     const startTime = game?.game?.startTime ? new Date(game.game.startTime) : new Date();
     const endTime = game?.game?.endTime ? new Date(game.game.endTime) : new Date();
-    
-    const dateString = startTime.toLocaleDateString([], { 
-        weekday: 'long', 
-        month: 'long', 
-        day: 'numeric' 
+
+    const dateString = startTime.toLocaleDateString([], {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric'
     });
-    
-    const timeString = `${startTime.toLocaleTimeString([], { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-    })} - ${endTime.toLocaleTimeString([], { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+
+    const timeString = `${startTime.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    })} - ${endTime.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
     })}`;
 
     const handleAction = () => {
@@ -51,13 +51,13 @@ export default function GameDetailsModal({ visible, onClose, game, onJoin, onLea
         >
             <View style={gameDetailsModalThemes.modalContainer}>
                 {!game ? (
-                     <View style={[gameDetailsModalThemes.modalContent, { height: 200, justifyContent: 'center', alignItems: 'center' }]}>
+                    <View style={[gameDetailsModalThemes.modalContent, { height: 200, justifyContent: 'center', alignItems: 'center' }]}>
                         <ActivityIndicator color={COLORS.primary} size="large" />
-                     </View>
+                    </View>
                 ) : (
                     <View style={gameDetailsModalThemes.modalContent}>
                         <View style={gameDetailsModalThemes.handle} />
-                        
+
                         <ScrollView
                             showsVerticalScrollIndicator={false}
                             contentContainerStyle={gameDetailsModalThemes.scrollContent}
@@ -65,10 +65,10 @@ export default function GameDetailsModal({ visible, onClose, game, onJoin, onLea
                             {/* Hero Section */}
                             <View style={gameDetailsModalThemes.heroSection}>
                                 <View style={gameDetailsModalThemes.iconHalo}>
-                                    <Ionicons 
-                                        name={game?.sportName ? (game.sportName.toLowerCase().includes('basketball') ? 'basketball' : 'football') : 'trophy'} 
-                                        size={40} 
-                                        color={COLORS.primary} 
+                                    <Ionicons
+                                        name={game?.sportName ? (game.sportName.toLowerCase().includes('basketball') ? 'basketball' : 'football') : 'trophy'}
+                                        size={40}
+                                        color={COLORS.primary}
                                     />
                                 </View>
                                 <Text style={gameDetailsModalThemes.gameTitle}>{game?.game?.name || "Game Details"}</Text>
@@ -126,10 +126,10 @@ export default function GameDetailsModal({ visible, onClose, game, onJoin, onLea
                                 </View>
                                 <View style={gameDetailsModalThemes.statItem}>
                                     <View style={gameDetailsModalThemes.statIconBox}>
-                                        <Ionicons 
-                                            name={game?.game?.accessType === 'private' ? 'lock-closed' : 'lock-open'} 
-                                            size={16} 
-                                            color={game?.game?.accessType === 'private' ? '#ef4444' : '#f59e0b'} 
+                                        <Ionicons
+                                            name={game?.game?.accessType === 'private' ? 'lock-closed' : 'lock-open'}
+                                            size={16}
+                                            color={game?.game?.accessType === 'private' ? '#ef4444' : '#f59e0b'}
                                         />
                                     </View>
                                     <View style={gameDetailsModalThemes.statContent}>
@@ -187,14 +187,17 @@ export default function GameDetailsModal({ visible, onClose, game, onJoin, onLea
                                     </Text>
                                 </View>
                             </View>
-                            
+
                             <View style={gameDetailsModalThemes.playersGrid}>
                                 {game?.memberProfiles && game.memberProfiles.length > 0 ? (
                                     game.memberProfiles.map((profile, index) => (
                                         <View key={profile.id || index} style={gameDetailsModalThemes.playerAvatarWrapper}>
                                             <View style={gameDetailsModalThemes.avatar}>
                                                 {profile.profileImageUrl ? (
-                                                    <View /> // Add Image component here if available
+                                                    <Image
+                                                        source={{ uri: profile.profileImageUrl }}
+                                                        style={gameDetailsModalThemes.avatarImage}
+                                                    />
                                                 ) : (
                                                     <Ionicons name="person" size={24} color="#94a3b8" />
                                                 )}
