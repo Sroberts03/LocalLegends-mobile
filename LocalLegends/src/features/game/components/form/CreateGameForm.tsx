@@ -2,18 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Switch } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { COLORS } from '@/src/themes/themes';
-import { GameApi } from '../api/GameApi';
+import { GameApi } from '../../api/GameApi';
 import { GameStatus, SkillLevel, GenderPreference, AccessType } from '@/src/models/Game';
-import { CreateGameFormStyles as styles } from './themes/CreateGameFormStyles';
+import { CreateGameFormStyles as styles } from '../themes/CreateGameFormStyles';
 import Sport from '@/src/models/Sport';
-import { validateGameCreation } from './utils/GameCreationValidator';
-import GooglePlacesInput from './utils/GooglePlacesInput';
-import { parseGoogleAddress } from './utils/GoogleAddressParser';
-import { FormSectionHeader } from './form/FormSectionHeader';
-import { PlayerTicker } from './form/PlayerTicker';
-import { FormToggle } from './form/FormToggle';
-import { ChipSelector } from './form/ChipSelector';
-import { DateTimePickerModal } from './form/DateTimePickerModal';
+import { validateGameCreation } from '../utils/GameCreationValidator';
+import GooglePlacesInput from '../utils/GooglePlacesInput';
+import { parseGoogleAddress } from '../utils/GoogleAddressParser';
+import { FormSectionHeader } from '../form/FormSectionHeader';
+import { PlayerTicker } from '../form/PlayerTicker';
+import { FormToggle } from '../form/FormToggle';
+import { ChipSelector } from '../form/ChipSelector';
+import { DateTimePickerModal } from '../form/DateTimePickerModal';
 
 type CreateGameFormProps = {
     setIsCreateGameModalVisible: (isVisible: boolean) => void;

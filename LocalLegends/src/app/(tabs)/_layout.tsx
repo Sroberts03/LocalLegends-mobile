@@ -30,6 +30,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Ionicons name="basketball" size={28} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="myGames"
+        options={{
+          title: 'My Games',
+          tabBarIcon: ({ color }) => <Ionicons name="calendar" size={28} color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

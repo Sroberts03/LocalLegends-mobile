@@ -2,7 +2,7 @@ import { Modal, View, Text, TouchableWithoutFeedback, Pressable } from "react-na
 import { CreateGameModalTheme } from "./themes/CreateGameModalThemes";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "@/src/themes/themes";
-import CreateGameForm from "./CreateGameForm";
+import CreateGameForm from "./form/CreateGameForm";
 
 type CreateGameModalProps = {
     isVisible: boolean;
