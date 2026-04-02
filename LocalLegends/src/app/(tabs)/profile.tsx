@@ -1,7 +1,7 @@
-import Logout from "@/src/features/auth/components/Logout";
+import Profile from "@/src/features/profile/components/Profile";
 
-export default function Profile() {
+export default function ProfileScreen() {
     return (
-       <Logout />
+        <Profile />
     );
 }

@@ -1,4 +1,3 @@
-import Sport from "@/src/models/Sport";
 import BaseRequest from "../../BaseRequest";
 import { GetGamesReq, GetGamesRes, GetSportsRes, JoinGameReq, JoinGameRes } from "../Game.types";
 import Game, { GameCreation } from "@/src/models/Game";

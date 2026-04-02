@@ -4,6 +4,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import 'react-native-url-polyfill/auto';
 import { AuthProvider, useAuth } from '../features/auth/AuthContext';
 import { GameProvider } from '../features/game/GameContext';
+import { ProfileProvider } from '../features/profile/ProfileContext';
 
 function InitialLayout() {
   const { session, isLoading } = useAuth();
@@ -43,7 +44,9 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <GameProvider>
-        <InitialLayout />
+        <ProfileProvider>
+          <InitialLayout />
+        </ProfileProvider>
       </GameProvider>
     </AuthProvider>
   );
