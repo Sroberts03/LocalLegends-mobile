@@ -12,8 +12,23 @@ export default async function BaseRequest(
     let url = `${process.env.EXPO_PUBLIC_API_URL}/${endpoint}`;
 
     if (method === "GET" && data) {
-        const queryParams = new URLSearchParams(data).toString();
-        url += `?${queryParams}`;
+        const queryParams = Object.keys(data)
+            .filter(key => data[key] !== null && data[key] !== undefined && data[key] !== "")
+            .map(key => {
+                const value = data[key];
+                if (Array.isArray(value)) {
+                    return value
+                        .map(v => `${encodeURIComponent(key)}[]=${encodeURIComponent(v)}`)
+                        .join('&');
+                }
+                return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+            })
+            .filter(part => part !== "")
+            .join('&');
+            
+        if (queryParams) {
+            url += `?${queryParams}`;
+        }
     }
 
     const options: any = {

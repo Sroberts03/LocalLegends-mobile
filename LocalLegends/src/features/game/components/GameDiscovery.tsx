@@ -10,6 +10,7 @@ import { GameApi } from "../api/GameApi";
 import Map, { MapRef } from "@/src/features/game/components/Map";
 import FilterGameModal from "./FilterGameModal";
 import GameDetailsModal from "./GameDetailsModal";
+import { useGameContext } from "../GameContext";
 
 const INITIAL_REGION = {
     latitude: 40.2338,
@@ -19,95 +20,36 @@ const INITIAL_REGION = {
 };
 
 export default function GameDiscovery() {
-    const [location, setLocation] = useState<Location.LocationObject | null>(null);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [isInitialLoad, setIsInitialLoad] = useState(true);
-    const [isRefreshing, setIsRefreshing] = useState(false);
-    const [games, setGames] = useState<GameWithDetails[]>([]);
+    const { 
+        discoveryGames: games, 
+        isLoadingDiscovery: loading, 
+        isInitialLoadDiscovery: isInitialLoad,
+        refreshDiscovery: handleManualRefresh,
+        filters: filter,
+        setFilters,
+        location,
+        errorMsg,
+        joinGame,
+        leaveGame
+    } = useGameContext();
+
     const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
     const mapRef = useRef<MapRef>(null);
-    
-    // Track manually applied filters separately from location
-    const [manualFilters, setManualFilters] = useState<Partial<GameFilter>>({
-        maxDistance: 25,
-        sportIds: [],
-        skillLevels: [],
-        genderPreferences: [],
-        favoritesOnly: false,
-        happeningTodayOnly: false,
-    });
     
     // MODAL STATE
     const [selectedGame, setSelectedGame] = useState<GameWithDetails | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     
-    // Combine location with manually applied filters
-    const filter = useMemo<GameFilter>(() => ({
-        latitude: location?.coords.latitude || INITIAL_REGION.latitude,
-        longitude: location?.coords.longitude || INITIAL_REGION.longitude,
-        maxDistance: manualFilters.maxDistance || 25,
-        sportIds: manualFilters.sportIds?.length ? manualFilters.sportIds : undefined,
-        skillLevels: manualFilters.skillLevels?.length ? manualFilters.skillLevels : undefined,
-        genderPreferences: manualFilters.genderPreferences?.length ? manualFilters.genderPreferences : undefined,
-        favoritesOnly: manualFilters.favoritesOnly || undefined,
-        happeningTodayOnly: manualFilters.happeningTodayOnly || undefined,
-    }), [location?.coords.latitude, location?.coords.longitude, manualFilters]);
-
     const [isCreateGameModalVisible, setIsCreateGameModalVisible] = useState(false);
 
-    const fetchGames = useCallback(async (isCancelledRef: { current: boolean }) => {
-        if (isInitialLoad && !location) return;
-
-        if (isInitialLoad) setLoading(true);
-        setIsRefreshing(true);
-
-        try {
-            const gamesResponse = await GameApi.getGames({ filter });
-            
-            if (!isCancelledRef.current) {
-                setGames(gamesResponse.games);
-                setIsInitialLoad(false);
-                setErrorMsg(null);
-            }
-        } catch (error) {
-            if (!isCancelledRef.current) {
-                setErrorMsg("Failed to load games");
-            }
-        } finally {
-            if (!isCancelledRef.current) {
-                setLoading(false);
-                setIsRefreshing(false);
-            }
-        }
-    }, [filter, isInitialLoad, location]);
-
-    useEffect(() => {
-        const isCancelledRef = { current: false };
-        fetchGames(isCancelledRef);
-        return () => { isCancelledRef.current = true; };
-    }, [fetchGames]);
-
-    const handleManualRefresh = () => {
-        const isCancelledRef = { current: false };
-        fetchGames(isCancelledRef);
-    };
-
     const handleRefocus = () => {
-        if (mapRef.current) {
+        if (mapRef.current && location) {
             mapRef.current.refocus();
         }
     };
 
     const handleApplyFilters = (newFilters: GameFilter) => {
-        setManualFilters({
-            maxDistance: newFilters.maxDistance,
-            sportIds: newFilters.sportIds,
-            skillLevels: newFilters.skillLevels,
-            genderPreferences: newFilters.genderPreferences,
-            favoritesOnly: newFilters.favoritesOnly,
-            happeningTodayOnly: newFilters.happeningTodayOnly,
-        });
+        setFilters(newFilters);
         setIsFilterModalVisible(false);
     };
 
@@ -119,9 +61,7 @@ export default function GameDiscovery() {
     const handleJoin = async () => {
         if (!selectedGame) return;
         try {
-            await GameApi.joinGame({ gameId: selectedGame.game.id });
-            // Refresh to update player counts
-            handleManualRefresh();
+            await joinGame(selectedGame.game.id);
         } catch (error) {
             console.error("Failed to join game:", error);
         }
@@ -130,34 +70,11 @@ export default function GameDiscovery() {
     const handleLeave = async () => {
         if (!selectedGame) return;
         try {
-            await GameApi.leaveGame({ gameId: selectedGame.game.id });
-            // Refresh to update player counts
-            handleManualRefresh();
+            await leaveGame(selectedGame.game.id);
         } catch (error) {
             console.error("Failed to leave game:", error);
         }
     };
-
-    useEffect(() => {
-            (async () => {
-                try {
-                    let { status } = await Location.requestForegroundPermissionsAsync();
-                    if (status !== 'granted') {
-                        setErrorMsg('Permission to access location was denied');
-                        setLoading(false);
-                        return;
-                    }
-    
-                    let currentLocation = await Location.getCurrentPositionAsync({});
-                    setLocation(currentLocation);
-                } catch (err) {
-                    console.error("Error getting location:", err);
-                    setErrorMsg('Could not fetch location.');
-                } finally {
-                    setLoading(false);
-                }
-            })();
-        }, []);
 
     return (
         <View style={GameDiscoveryTheme.container}>
@@ -166,13 +83,13 @@ export default function GameDiscovery() {
                     ref={mapRef}
                     games={games}
                     filter={filter}
-                    setGames={setGames}
-                    loading={loading}
-                    setLoading={setLoading}
+                    setGames={() => {}} 
+                    loading={isInitialLoad}
+                    setLoading={() => {}} 
                     errorMsg={errorMsg}
-                    setErrorMsg={setErrorMsg}
+                    setErrorMsg={() => {}} 
                     location={location}
-                    setLocation={setLocation}
+                    setLocation={() => {}} 
                     INITIAL_REGION={INITIAL_REGION}
                     onGamePress={handleMarkerPress}
                 />
@@ -182,7 +99,7 @@ export default function GameDiscovery() {
                     <ButtonContainer 
                         onRefresh={handleManualRefresh}
                         onRefocus={handleRefocus}
-                        isLoading={isRefreshing}
+                        isLoading={loading}
                         setIsFilterModalVisible={setIsFilterModalVisible}
                     />
                 </View>

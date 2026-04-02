@@ -3,6 +3,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import 'react-native-url-polyfill/auto';
 import { AuthProvider, useAuth } from '../features/auth/AuthContext';
+import { GameProvider } from '../features/game/GameContext';
 
 function InitialLayout() {
   const { session, isLoading } = useAuth();
@@ -41,7 +42,9 @@ function InitialLayout() {
 export default function RootLayout() {
   return (
     <AuthProvider>
+      <GameProvider>
         <InitialLayout />
+      </GameProvider>
     </AuthProvider>
   );
 }

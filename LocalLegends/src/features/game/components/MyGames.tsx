@@ -7,6 +7,7 @@ import GameDetailsModal from "./GameDetailsModal";
 import { MyGamesThemes as styles } from "./themes/MyGamesThemes";
 import { COLORS } from "@/src/themes/themes";
 import { Ionicons } from "@expo/vector-icons";
+import { useGameContext } from "../GameContext";
 
 type Section = {
     title: string;
@@ -14,43 +15,18 @@ type Section = {
 };
 
 export default function MyGames() {
-    const [myGames, setMyGames] = useState<GameWithDetails[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isRefreshing, setIsRefreshing] = useState(false);
+    const {
+        myGames,
+        isLoadingMyGames: isLoading,
+        isInitialLoadMyGames: isInitialLoad,
+        refreshMyGames: onRefresh,
+        joinGame,
+        leaveGame
+    } = useGameContext();
     
     // Modal State
     const [selectedGame, setSelectedGame] = useState<GameWithDetails | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
-
-    const fetchMyGames = async (showLoading = true) => {
-        if (showLoading) setIsLoading(true);
-        try {
-            const res = await GameApi.getMyGames();
-            console.log("DEBUG: MyGames API Response:", JSON.stringify(res, null, 2));
-            
-            // Ensure dates are actual Date objects if they come back as strings
-            const sanitizedGames = res.games.map(g => ({
-                ...g,
-                game: { ...g.game, startTime: new Date(g.game.startTime) }
-            }));
-            console.log("DEBUG: Sanitized Games Count:", sanitizedGames.length);
-            setMyGames(sanitizedGames);
-        } catch (error) {
-            console.error("Error fetching my games:", error);
-        } finally {
-            setIsLoading(false);
-            setIsRefreshing(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchMyGames();
-    }, []);
-
-    const onRefresh = () => {
-        setIsRefreshing(true);
-        fetchMyGames(false);
-    };
 
     const handleGameCardPress = (game: GameWithDetails) => {
         console.log("DEBUG: Game Card Clicked:", game.game.name);
@@ -61,8 +37,7 @@ export default function MyGames() {
     const handleJoin = async () => {
         if (!selectedGame) return;
         try {
-            await GameApi.joinGame({ gameId: selectedGame.game.id });
-            fetchMyGames(false);
+            await joinGame(selectedGame.game.id);
         } catch (error) {
             console.log("Error joining game:", error);
         }
@@ -71,8 +46,7 @@ export default function MyGames() {
     const handleLeave = async () => {
         if (!selectedGame) return;
         try {
-            await GameApi.leaveGame({ gameId: selectedGame.game.id });
-            fetchMyGames(false);
+            await leaveGame(selectedGame.game.id);
         } catch (error) {
             console.log("Error leaving game:", error);
         }
@@ -115,7 +89,7 @@ export default function MyGames() {
             .map(([title, data]): Section => ({ title, data }));
     }, [myGames]);
 
-    if (isLoading) {
+    if (isInitialLoad) {
         return (
             <View style={[styles.container, { justifyContent: 'center' }]}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
@@ -141,7 +115,7 @@ export default function MyGames() {
                 contentContainerStyle={styles.listContent}
                 stickySectionHeadersEnabled={false}
                 refreshControl={
-                    <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+                    <RefreshControl refreshing={isLoading && myGames.length > 0} onRefresh={onRefresh} tintColor={COLORS.primary} />
                 }
                 ListHeaderComponent={() => (
                     <View style={{ marginBottom: 10 }}>
