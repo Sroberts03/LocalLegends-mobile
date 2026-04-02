@@ -5,7 +5,7 @@ import { gameDetailsModalThemes } from "./themes/GameDetailsModalTheme";
 import { GameWithDetails } from "@/src/models/Game";
 import { COLORS } from "@/src/themes/themes";
 import { PlayerAvatar, StatItem } from "./GameDetailsComponents";
-import { getSportIcon } from "./utils/SportIcon";
+import { getSportIcon } from "../../common/SportIcon";
 
 type GameDetailsModalProps = {
     visible: boolean;
@@ -41,9 +41,9 @@ export default function GameDetailsModal({ visible, onClose, game, onJoin, onLea
                             {/* Hero Section */}
                             <View style={gameDetailsModalThemes.heroSection}>
                                 <View style={gameDetailsModalThemes.iconHalo}>
-                                    <Ionicons 
-                                        name={getSportIcon(game?.sportName)} 
-                                        size={40} color={COLORS.primary} 
+                                    <Ionicons
+                                        name={getSportIcon(game?.sportName)}
+                                        size={40} color={COLORS.primary}
                                     />
                                 </View>
                                 <Text style={gameDetailsModalThemes.gameTitle}>{game?.game?.name || "Game Details"}</Text>
@@ -73,11 +73,11 @@ export default function GameDetailsModal({ visible, onClose, game, onJoin, onLea
                             <View style={gameDetailsModalThemes.statsGrid}>
                                 <StatItem icon="trending-up" color="#6366f1" label="Skill" value={game?.game?.skillLevel || 'N/A'} />
                                 <StatItem icon="people" color="#ec4899" label="Gender" value={game?.game?.genderPreference || 'Any'} />
-                                <StatItem 
-                                    icon={game?.game?.accessType === 'private' ? 'lock-closed' : 'lock-open'} 
-                                    color={game?.game?.accessType === 'private' ? '#ef4444' : '#f59e0b'} 
-                                    label="Access" 
-                                    value={game?.game?.accessType ? (game.game.accessType.charAt(0).toUpperCase() + game.game.accessType.slice(1)) : 'Public'} 
+                                <StatItem
+                                    icon={game?.game?.accessType === 'private' ? 'lock-closed' : 'lock-open'}
+                                    color={game?.game?.accessType === 'private' ? '#ef4444' : '#f59e0b'}
+                                    label="Access"
+                                    value={game?.game?.accessType ? (game.game.accessType.charAt(0).toUpperCase() + game.game.accessType.slice(1)) : 'Public'}
                                 />
                                 <StatItem icon="repeat" color="#8b5cf6" label="Recurring" value={game?.game?.isRecurring ? 'Weekly' : 'One-time'} />
                                 <StatItem icon="person-add" color="#10b981" label="Spots Left" value={(game?.game?.maxPlayers || 0) - (game?.game?.currentPlayerCount || 0)} />

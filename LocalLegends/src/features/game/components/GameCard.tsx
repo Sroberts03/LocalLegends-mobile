@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { GameWithDetails } from "@/src/models/Game";
 import { MyGamesThemes as styles } from "./themes/MyGamesThemes";
 import { COLORS } from "@/src/themes/themes";
-import { getSportIcon } from "./utils/SportIcon";
+import { getSportIcon } from "../../common/SportIcon";
 
 type GameCardProps = {
     data: GameWithDetails;

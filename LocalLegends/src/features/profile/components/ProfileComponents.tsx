@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { profileThemes as styles } from '../themes/ProfileScreenTheme';
 import { COLORS } from '@/src/themes/themes';
 import Sport from '@/src/models/Sport';
 import { GameWithDetails } from '@/src/models/Game';
+import { getSportIcon } from "../../common/SportIcon"; 
 
 // 1. Individual Stat Card Component
 export const StatCard = ({ label, value, icon }: { label: string, value: number | string, icon: any }) => (
@@ -24,10 +26,28 @@ interface ProfileHeaderProps {
 }
 
 export const ProfileHeader = ({ displayName, profileImageUrl, bio, onEditPress }: ProfileHeaderProps) => {
+    const router = useRouter();
     const username = `@${displayName?.toLowerCase().replace(/\s+/g, '') || 'locallegend'}`;
     
     return (
         <View style={styles.headerGradient}>
+            {/* Top Navigation Buttons */}
+            <View style={styles.topButtonsContainer}>
+                <TouchableOpacity 
+                    style={styles.headerIconButton}
+                    onPress={() => router.push('/notifications')}
+                >
+                    <Ionicons name="notifications-outline" size={22} color="#1e293b" />
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                    style={styles.headerIconButton}
+                    onPress={() => router.push('/settings')}
+                >
+                    <Ionicons name="settings-sharp" size={22} color="#1e293b" />
+                </TouchableOpacity>
+            </View>
+
             <View style={styles.avatarContainer}>
                 {profileImageUrl ? (
                     <Image source={{ uri: profileImageUrl }} style={styles.avatar} />
@@ -91,7 +111,7 @@ export const ActivityList = ({ games, onGamePress }: ActivityListProps) => (
                         onPress={() => onGamePress?.(game.game.id)}
                     >
                         <View style={styles.gameIconBox}>
-                            <Ionicons name="calendar-outline" size={20} color={COLORS.primary} />
+                            <Ionicons name={getSportIcon(game.sportName)} size={20} color={COLORS.primary} />
                         </View>
                         <View style={styles.gameInfo}>
                             <Text style={styles.gameName}>{game.game.name}</Text>
@@ -112,3 +132,4 @@ export const ActivityList = ({ games, onGamePress }: ActivityListProps) => (
         )}
     </View>
 );
+

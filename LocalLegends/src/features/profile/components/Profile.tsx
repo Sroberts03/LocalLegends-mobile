@@ -73,12 +73,6 @@ export default function Profile() {
                 games={profile.last5Games} 
                 onGamePress={(id) => console.log('Game Pressed:', id)}
             />
-
-            {/* Logout Button */}
-            <TouchableOpacity onPress={AuthApi.logout} style={styles.logoutButton}>
-                <Ionicons name="log-out-outline" size={20} color="#ef4444" />
-                <Text style={styles.logoutText}>Log Out</Text>
-            </TouchableOpacity>
         </ScrollView>
     );
 }

@@ -17,8 +17,8 @@ function InitialLayout() {
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!session && !inAuthGroup) {
-      router.replace('/(auth)/Login'); 
-      
+      router.replace('/(auth)/Login');
+
     } else if (session && inAuthGroup) {
       router.replace('/(tabs)');
     }

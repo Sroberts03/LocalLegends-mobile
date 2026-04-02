@@ -5,7 +5,7 @@ import * as Location from 'expo-location';
 import { COLORS } from '@/src/themes/themes';
 import { Ionicons } from '@expo/vector-icons';
 import { GameFilter, GameWithDetails } from '@/src/models/Game';
-import { getSportIcon } from './utils/SportIcon';
+import { getSportIcon } from '../../common/SportIcon';
 import { MapThemes } from './themes/MapThemes';
 
 export interface MapRef {
@@ -32,15 +32,15 @@ type MapProps = {
 }
 
 // 1. The wrapper component with jitter logic
-const CustomMarker = ({ 
-    game, 
-    gameLength, 
-    onGamePress, 
-    indexInGroup = 0, 
-    totalInGroup = 1 
-}: { 
-    game: GameWithDetails, 
-    gameLength: number, 
+const CustomMarker = ({
+    game,
+    gameLength,
+    onGamePress,
+    indexInGroup = 0,
+    totalInGroup = 1
+}: {
+    game: GameWithDetails,
+    gameLength: number,
     onGamePress?: (game: GameWithDetails) => void,
     indexInGroup?: number,
     totalInGroup?: number
@@ -145,7 +145,7 @@ const Map = forwardRef<MapRef, MapProps>(({
                 showsUserLocation={true}
                 showsPointsOfInterest={false}
             >
-                {Object.values(groupedGames).flatMap((group) => 
+                {Object.values(groupedGames).flatMap((group) =>
                     group.map((game, index) => (
                         <CustomMarker
                             key={`${game.game.id}-${games.length}`}
