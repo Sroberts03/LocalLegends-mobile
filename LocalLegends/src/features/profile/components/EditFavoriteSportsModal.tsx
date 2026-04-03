@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { 
     Modal, 
     View, 
     Text, 
     TouchableOpacity, 
     ScrollView, 
-    StyleSheet, 
     ActivityIndicator,
-    Pressable
+    Pressable,
+    TouchableWithoutFeedback
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useProfile } from "../ProfileContext";
@@ -85,6 +85,10 @@ export default function EditFavoriteSportsModal({ visible, onClose }: EditFavori
         setSelectedIds(next);
     };
 
+    const handleClearAll = () => {
+        setSelectedIds(new Set());
+    };
+
     const handleSave = async () => {
         setIsSaving(true);
         try {
@@ -104,75 +108,91 @@ export default function EditFavoriteSportsModal({ visible, onClose }: EditFavori
         <Modal
             visible={visible}
             animationType="slide"
-            presentationStyle="pageSheet"
+            transparent={true}
             onRequestClose={onClose}
         >
-            <SafeAreaView style={styles.container}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={onClose} disabled={isSaving}>
-                        <Text style={styles.cancelButton}>Cancel</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.title}>Favorite Sports</Text>
-                    <TouchableOpacity onPress={handleSave} disabled={isSaving}>
-                        {isSaving ? (
-                            <ActivityIndicator size="small" color={COLORS.primary} />
-                        ) : (
-                            <Text style={styles.doneButton}>Done</Text>
-                        )}
-                    </TouchableOpacity>
-                </View>
+            <TouchableWithoutFeedback onPress={onClose}>
+                <View style={styles.modalContainer}>
+                    <TouchableWithoutFeedback>
+                        <View style={styles.modalContent}>
+                            <View style={styles.handle} />
+                            
+                            {/* Header */}
+                            <View style={styles.header}>
+                                <Text style={styles.modalTitle}>Favorite Sports</Text>
+                                <TouchableOpacity onPress={onClose} disabled={isSaving}>
+                                    <Ionicons name="close-circle" size={28} color="#cbd5e0" />
+                                </TouchableOpacity>
+                            </View>
 
-                {isLoadingSports ? (
-                    <View style={styles.loaderContainer}>
-                        <ActivityIndicator size="large" color={COLORS.primary} />
-                    </View>
-                ) : (
-                    <ScrollView contentContainerStyle={styles.scrollContent}>
-                        <Text style={styles.subtitle}>
-                            Select the sports you love. These will appear on your public profile!
-                        </Text>
-                        
-                        <View style={styles.grid}>
-                            {possibleSports.map((sport) => {
-                                const isSelected = selectedIds.has(sport.id);
-                                return (
-                                    <Pressable
-                                        key={sport.id}
-                                        style={[
-                                            styles.sportCard,
-                                            isSelected && styles.sportCardSelected
-                                        ]}
-                                        onPress={() => handleToggleSport(sport.id)}
-                                    >
-                                        <View style={[
-                                            styles.iconContainer,
-                                            isSelected && styles.iconContainerSelected
-                                        ]}>
-                                            <Ionicons 
-                                                name={getSportIcon(sport.slug)} 
-                                                size={32} 
-                                                color={isSelected ? "#fff" : "#64748b"} 
-                                            />
-                                        </View>
-                                        <Text style={[
-                                            styles.sportLabel,
-                                            isSelected && styles.sportLabelSelected
-                                        ]}>
-                                            {sport.name}
-                                        </Text>
-                                        {isSelected && (
-                                            <View style={styles.checkmark}>
-                                                <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />
-                                            </View>
-                                        )}
-                                    </Pressable>
-                                );
-                            })}
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                <Text style={styles.subtitle}>
+                                    Select the sports you love. These will appear on your public profile!
+                                </Text>
+
+                                {isLoadingSports ? (
+                                    <View style={styles.loaderContainer}>
+                                        <ActivityIndicator size="large" color={COLORS.primary} />
+                                    </View>
+                                ) : (
+                                    <View style={styles.chipContainer}>
+                                        {possibleSports.map((sport) => {
+                                            const isSelected = selectedIds.has(sport.id);
+                                            return (
+                                                <TouchableOpacity
+                                                    key={sport.id}
+                                                    style={[
+                                                        styles.chip,
+                                                        isSelected && styles.chipActive
+                                                    ]}
+                                                    onPress={() => handleToggleSport(sport.id)}
+                                                    disabled={isSaving}
+                                                >
+                                                    <Ionicons 
+                                                        name={getSportIcon(sport.slug)} 
+                                                        size={18} 
+                                                        color={isSelected ? "#fff" : "#64748b"} 
+                                                        style={{ marginRight: 6 }}
+                                                    />
+                                                    <Text style={[
+                                                        styles.chipText,
+                                                        isSelected && styles.chipTextActive
+                                                    ]}>
+                                                        {sport.name}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            );
+                                        })}
+                                    </View>
+                                )}
+                            </ScrollView>
+
+                            {/* Footer Actions */}
+                            <View style={styles.footerContainer}>
+                                <TouchableOpacity 
+                                    style={styles.clearButton} 
+                                    onPress={handleClearAll}
+                                    disabled={isSaving}
+                                >
+                                    <Text style={styles.clearButtonText}>Clear All</Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity 
+                                    style={styles.saveButton} 
+                                    onPress={handleSave}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? (
+                                        <ActivityIndicator size="small" color="#fff" />
+                                    ) : (
+                                        <Text style={styles.saveButtonText}>Save Changes</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    </ScrollView>
-                )}
-            </SafeAreaView>
+                    </TouchableWithoutFeedback>
+                </View>
+            </TouchableWithoutFeedback>
         </Modal>
     );
 }

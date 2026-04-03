@@ -1,102 +1,125 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 import { COLORS } from "@/src/themes/themes";
 
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
 export const EditFavoriteSportsThemes = StyleSheet.create({
-    container: {
+    modalContainer: {
         flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
         backgroundColor: '#fff',
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        paddingHorizontal: 20,
+        paddingBottom: 40,
+        maxHeight: SCREEN_HEIGHT * 0.85,
+        width: '100%',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 20,
+    },
+    handle: {
+        width: 40,
+        height: 5,
+        backgroundColor: '#e2e8f0',
+        borderRadius: 3,
+        alignSelf: 'center',
+        marginTop: 12,
+        marginBottom: 20,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
+        marginBottom: 24,
     },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#1e293b',
-    },
-    cancelButton: {
-        fontSize: 16,
-        color: '#64748b',
-    },
-    doneButton: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: COLORS.primary,
-    },
-    loaderContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    scrollContent: {
-        padding: 20,
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: '800',
+        color: '#1a202c',
+        letterSpacing: -0.5,
     },
     subtitle: {
         fontSize: 15,
         color: '#64748b',
         marginBottom: 24,
-        textAlign: 'center',
         lineHeight: 22,
     },
-    grid: {
+    chipContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 12,
-        justifyContent: 'space-between',
+        gap: 10,
+        marginBottom: 20,
     },
-    sportCard: {
-        width: '31%', // Approximately 3 items per row
-        aspectRatio: 1,
-        backgroundColor: '#f8fafc',
-        borderRadius: 20,
-        padding: 12,
+    chip: {
+        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 2,
-        borderColor: 'transparent',
-        position: 'relative',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 12,
+        borderWidth: 1,
+        backgroundColor: '#f1f5f9',
+        borderColor: '#e2e8f0',
     },
-    sportCardSelected: {
-        backgroundColor: '#eff6ff',
+    chipActive: {
+        backgroundColor: COLORS.primary,
         borderColor: COLORS.primary,
     },
-    iconContainer: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    iconContainerSelected: {
-        backgroundColor: COLORS.primary,
-    },
-    sportLabel: {
-        fontSize: 13,
+    chipText: {
+        fontSize: 14,
         fontWeight: '600',
-        color: '#64748b',
-        textAlign: 'center',
+        color: '#475569',
     },
-    sportLabelSelected: {
-        color: COLORS.primary,
+    chipTextActive: {
+        color: '#fff',
     },
-    checkmark: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        backgroundColor: '#fff',
-        borderRadius: 10,
-    }
+    footerContainer: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 10,
+        paddingTop: 10,
+    },
+    clearButton: {
+        flex: 1,
+        height: 56,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f7fafc',
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+    },
+    clearButtonText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#718096',
+    },
+    saveButton: {
+        flex: 2,
+        height: 56,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: COLORS.primary,
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    saveButtonText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#fff',
+    },
+    loaderContainer: {
+        height: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 });
