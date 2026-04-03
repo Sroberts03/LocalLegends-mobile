@@ -9,7 +9,6 @@ import {
     Pressable,
     TouchableWithoutFeedback
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useProfile } from "../ProfileContext";
 import Sport from "@/src/models/Sport";
 import { GameApi } from "@/src/features/game/api/GameApi";

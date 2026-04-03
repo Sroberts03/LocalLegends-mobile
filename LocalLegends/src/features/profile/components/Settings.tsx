@@ -78,27 +78,6 @@ export default function Settings() {
                 />
             </View>
 
-            <SectionHeader title="App Preferences" />
-            <View style={styles.card}>
-                <SettingRow 
-                    icon="moon-outline" 
-                    label="Dark mode" 
-                    showSwitch 
-                    switchValue={darkMode} 
-                    onToggle={setDarkMode} 
-                />
-                <SettingRow 
-                    icon="globe-outline" 
-                    label="Language" 
-                    onPress={() => {alert("TODO: Language") }}
-                />
-                <SettingRow 
-                    icon="map-outline" 
-                    label="Distance Units" 
-                    onPress={() => {alert("TODO: Distance Units") }}
-                />
-            </View>
-
             <SectionHeader title="Support & Legal" />
             <View style={styles.card}>
                 <SettingRow 
