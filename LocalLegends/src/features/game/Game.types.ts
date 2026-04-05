@@ -5,6 +5,12 @@ export interface GetGamesReq {
     filter: GameFilter;
 }
 
+export interface CreateGameReq extends GameCreation { }
+
+export interface CreateGameRes {
+    game: GameWithDetails;
+}
+    
 export interface GetGamesRes {
     games: GameWithDetails[];
 }
@@ -12,12 +18,6 @@ export interface GetGamesRes {
 export interface GetSportsRes {
     sports: Sport[];
 }
-
-export interface CreateGameRes {
-    game: Game;
-}
-
-export interface CreateGamesReq extends GameCreation { }
 
 export interface JoinGameReq {
     gameId: string;

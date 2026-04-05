@@ -1,16 +1,15 @@
 import CreateGameButton from "@/src/features/game/components/discoveryButtons/CreateGameButton";
 import { GameDiscoveryTheme } from "./themes/GameDiscoveryTheme";
 import { View, Alert, Platform, Linking } from "react-native";
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useState, useRef } from "react";
 import CreateGameModal from "./CreateGameModal";
 import { GameFilter, GameWithDetails } from "@/src/models/Game";
-import * as Location from 'expo-location';
 import ButtonContainer from "./discoveryButtons/ButtonContainer";
-import { GameApi } from "../api/GameApi";
 import Map, { MapRef } from "@/src/features/game/components/Map";
 import FilterGameModal from "./FilterGameModal";
 import GameDetailsModal from "./GameDetailsModal";
 import { useGameContext } from "../GameContext";
+import { handleAddressPress } from "./utils/OpenMaps";
 
 const INITIAL_REGION = {
     latitude: 40.2338,
@@ -80,42 +79,6 @@ export default function GameDiscovery() {
         } catch (error) {
             console.error("Failed to leave game:", error);
         }
-    };
-
-    const handleAddressPress = () => {
-        if (!selectedGame) return;
-        
-        const { latitude, longitude, locationName } = selectedGame;
-        const scheme = Platform.OS === 'ios' ? 'maps:' : 'geo:';
-        const url = Platform.select({
-            ios: `${scheme}0,0?q=${locationName}&ll=${latitude},${longitude}`,
-            android: `${scheme}${latitude},${longitude}?q=${locationName}`
-        });
-
-        Alert.alert(
-            "Open in Maps",
-            "Choose your preferred maps provider",
-            [
-                {
-                    text: "Apple Maps",
-                    onPress: () => {
-                        const appleUrl = `http://maps.apple.com/?q=${locationName}&ll=${latitude},${longitude}`;
-                        Linking.openURL(appleUrl);
-                    }
-                },
-                {
-                    text: "Google Maps",
-                    onPress: () => {
-                        const googleUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-                        Linking.openURL(googleUrl);
-                    }
-                },
-                {
-                    text: "Cancel",
-                    style: "cancel"
-                }
-            ]
-        );
     };
 
     return (

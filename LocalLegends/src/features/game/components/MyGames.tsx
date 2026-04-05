@@ -9,6 +9,7 @@ import { COLORS } from "@/src/themes/themes";
 import { Ionicons } from "@expo/vector-icons";
 import { useGameContext } from "../GameContext";
 import { useRouter } from "expo-router";
+import { handleAddressPress } from "./utils/OpenMaps";
 
 type Section = {
     title: string;
@@ -149,6 +150,7 @@ export default function MyGames() {
                 game={selectedGame!}
                 onJoin={handleJoin}
                 onLeave={handleLeave}
+                onAddressPress={handleAddressPress}
             />
         </View>
     );

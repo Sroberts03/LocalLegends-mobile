@@ -14,6 +14,8 @@ import { PlayerTicker } from '../form/PlayerTicker';
 import { FormToggle } from '../form/FormToggle';
 import { ChipSelector } from '../form/ChipSelector';
 import { DateTimePickerModal } from '../form/DateTimePickerModal';
+import { useGameContext } from '../../GameContext';
+import { useProfile } from '@/src/features/profile/ProfileContext';
 
 type CreateGameFormProps = {
     setIsCreateGameModalVisible: (isVisible: boolean) => void;
@@ -21,6 +23,8 @@ type CreateGameFormProps = {
 };
 
 export default function CreateGameForm({ setIsCreateGameModalVisible, initialLocation }: CreateGameFormProps) {
+    const { createGame } = useGameContext();
+    const { refreshProfile } = useProfile();
     const [sportId, setSportId] = useState<string>('');
     const [googlePlaceId, setGooglePlaceId] = useState<string>('');
     const [name, setName] = useState('');
@@ -184,12 +188,13 @@ export default function CreateGameForm({ setIsCreateGameModalVisible, initialLoc
 
         try {
             setIsSubmitting(true);
-            await GameApi.createGame({
+            await createGame({
                 sportId, googlePlaceId, gameName: name, gameDescription: description,
                 streetAddress, city, state, zipCode, country, latitude, longitude,
                 locationName, locationDescription, maxPlayers, minPlayers,
                 startTime, endTime, isRecurring, skillLevel, genderPreference, accessType
             });
+            await refreshProfile();
             clearFields();
             setIsCreateGameModalVisible(false);
             Alert.alert("Success", "Game created successfully!");

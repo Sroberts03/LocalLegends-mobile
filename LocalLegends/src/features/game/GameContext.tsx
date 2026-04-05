@@ -26,6 +26,7 @@ type GameContextType = {
     // Actions
     joinGame: (gameId: string) => Promise<void>;
     leaveGame: (gameId: string) => Promise<void>;
+    createGame: (gameData: any) => Promise<void>;
 };
 
 const INITIAL_REGION = {
@@ -191,6 +192,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         }
     }, [refreshDiscovery, refreshMyGames]);
 
+    const createGame = useCallback(async (gameData: any) => {
+        try {
+            await GameApi.createGame(gameData);
+            // Refresh both lists to show the new game
+            await Promise.all([refreshDiscovery(), refreshMyGames()]);
+        } catch (error) {
+            console.error("Failed to create game:", error);
+            throw error;
+        }
+    }, [refreshDiscovery, refreshMyGames]);
+
     const value = useMemo(() => ({
         discoveryGames,
         isLoadingDiscovery,
@@ -205,7 +217,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         location,
         errorMsg,
         joinGame,
-        leaveGame
+        leaveGame,
+        createGame
     }), [
         discoveryGames, 
         isLoadingDiscovery, 
@@ -219,7 +232,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         location, 
         errorMsg, 
         joinGame, 
-        leaveGame
+        leaveGame,
+        createGame
     ]);
 
     return (

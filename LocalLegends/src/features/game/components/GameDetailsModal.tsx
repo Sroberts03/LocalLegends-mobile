@@ -13,7 +13,7 @@ type GameDetailsModalProps = {
     game: GameWithDetails;
     onJoin?: () => void;
     onLeave?: () => void;
-    onAddressPress?: () => void;
+    onAddressPress: (game: GameWithDetails) => void;
 }
 
 export default function GameDetailsModal(
@@ -65,7 +65,7 @@ export default function GameDetailsModal(
                                     <Text style={gameDetailsModalThemes.cardValue}>{startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
                                     <Text style={gameDetailsModalThemes.cardSubValue}>{startTime.toLocaleDateString([], { month: 'short', day: 'numeric' })}</Text>
                                 </View>
-                                <TouchableOpacity onPress={onAddressPress}>
+                                <TouchableOpacity onPress={() => onAddressPress(game)}>
                                     <View style={gameDetailsModalThemes.mainCard}>
                                         <View style={gameDetailsModalThemes.cardIconRow}><Ionicons name="location" size={16} color="#e11d48" /><Text style={gameDetailsModalThemes.cardLabel}>Location</Text></View>
                                         <Text style={gameDetailsModalThemes.cardValue} numberOfLines={1}>{game?.locationName}</Text>

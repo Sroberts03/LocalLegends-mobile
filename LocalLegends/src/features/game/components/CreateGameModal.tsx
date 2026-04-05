@@ -38,7 +38,7 @@ export default function CreateGameModal({ isVisible, setIsCreateGameModalVisible
                             </View>
 
                             <CreateGameForm 
-                                setIsCreateGameModalVisible={setIsCreateGameModalVisible} 
+                                setIsCreateGameModalVisible={handleClose} 
                                 initialLocation={initialLocation}
                             />
 

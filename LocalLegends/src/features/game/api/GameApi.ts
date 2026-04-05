@@ -1,13 +1,12 @@
 import BaseRequest from "../../BaseRequest";
-import { GetGamesReq, GetGamesRes, GetSportsRes, JoinGameReq, JoinGameRes } from "../Game.types";
-import Game, { GameCreation } from "@/src/models/Game";
+import { CreateGameReq, CreateGameRes, GetGamesReq, GetGamesRes, GetSportsRes, JoinGameReq, JoinGameRes } from "../Game.types";
 
 export const GameApi = {
     async getGames(req: GetGamesReq): Promise<GetGamesRes> {
         return await BaseRequest("GET", req.filter, "games/list-games");
     },
 
-    async createGame(gameData: GameCreation): Promise<Game> {
+    async createGame(gameData: CreateGameReq): Promise<CreateGameRes> {
         return await BaseRequest("POST", gameData, "games/create-game");
     },
 
