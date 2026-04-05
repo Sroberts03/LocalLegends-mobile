@@ -13,6 +13,7 @@ export interface EditProfileRequest {
     displayName?: string;
     bio?: string;
     profilePicture?: string;
+    pushToken?: string;
 }
 
 export interface EditProfileResponse extends Profile { 

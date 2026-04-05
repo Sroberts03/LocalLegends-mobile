@@ -8,9 +8,19 @@ export default class Profile {
     status: ProfileStatus;
     profileImageUrl?: string;
     reliabilityScore?: number;
+    pushToken?: string;
     yearJoined: number;
 
-    constructor(id: string, displayName: string, status: ProfileStatus, profileImageUrl?: string, yearJoined: number = new Date().getFullYear(), bio?: string, reliabilityScore?: number) {
+    constructor(
+        id: string, 
+        displayName: string, 
+        status: ProfileStatus, 
+        profileImageUrl?: string, 
+        yearJoined: number = new Date().getFullYear(), 
+        bio?: string, 
+        reliabilityScore?: number, 
+        pushToken?: string
+    ) {
         this.id = id;
         this.displayName = displayName;
         this.status = status;
@@ -18,6 +28,7 @@ export default class Profile {
         this.profileImageUrl = profileImageUrl;
         this.bio = bio;
         this.reliabilityScore = reliabilityScore;
+        this.pushToken = pushToken;
     }
 }
 

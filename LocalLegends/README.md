@@ -1,50 +1,34 @@
-# Welcome to your Expo app 👋
+# LocalLegends Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This directory contains the source code for the **LocalLegends** mobile application.
 
-## Get started
+For a full overview of the project, features, and tech stack, please refer to the [Root README](../README.md).
 
-1. Install dependencies
+## 🛠 Features in this package
 
+- **Native Geospatial Maps**: Using Cluster-based Google Maps.
+- **Real-time Messaging**: Built on Supabase Channels.
+- **Expo Router**: Modern file-based routing.
+- **Modular Architecture**: Feature-driven development in `src/features`.
+
+## 📦 Getting Started
+
+1. **Install Dependencies**:
    ```bash
    npm install
    ```
 
-2. Start the app
+2. **Setup Env**:
+   Add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` to your `.env` file.
 
+3. **Run App**:
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## 📂 Internal Structure
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- `src/app/`: Navigation and page layouts.
+- `src/features/`: Core business logic (auth, game, profile, search).
+- `src/themes/`: Design system tokens (colors, spacing, typography).
+- `src/lib/`: Third-party SDK initializations.

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/src/themes/themes';
 import { AuthApi } from '@/src/features/auth/api/AuthApi';
 import { styles } from '@/src/features/profile/themes/SettingsTheme';
 import { useRouter } from 'expo-router';
+import { checkNotificationPermissions, registerForPushNotificationsAsync } from '@/src/utils/notificationUtils';
 
 const SettingRow = ({ 
     icon, 
@@ -51,9 +52,32 @@ const SectionHeader = ({ title }: { title: string }) => (
 );
 
 export default function Settings() {
-    const [pushEnabled, setPushEnabled] = React.useState(true);
-    const [darkMode, setDarkMode] = React.useState(false);
+    const [pushEnabled, setPushEnabled] = useState(false);
+    const [darkMode, setDarkMode] = useState(false);
     const router = useRouter();
+
+    useEffect(() => {
+        const checkStatus = async () => {
+            const isEnabled = await checkNotificationPermissions();
+            setPushEnabled(isEnabled);
+        };
+        checkStatus();
+    }, []);
+
+    const handlePushToggle = async (value: boolean) => {
+        if (value) {
+            const token = await registerForPushNotificationsAsync();
+            if (token) {
+                setPushEnabled(true);
+            } else {
+                // If it fails (user denied), we might want to show an alert or just keep it off
+                setPushEnabled(false);
+            }
+        } else {
+            // For now just toggle UI, real unregister would involve server logic
+            setPushEnabled(false);
+        }
+    };
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -74,7 +98,7 @@ export default function Settings() {
                     label="Push Notifications" 
                     showSwitch 
                     switchValue={pushEnabled} 
-                    onToggle={setPushEnabled} 
+                    onToggle={handlePushToggle} 
                 />
             </View>
 
