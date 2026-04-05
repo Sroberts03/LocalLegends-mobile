@@ -17,9 +17,10 @@ import { DateTimePickerModal } from '../form/DateTimePickerModal';
 
 type CreateGameFormProps = {
     setIsCreateGameModalVisible: (isVisible: boolean) => void;
+    initialLocation?: { latitude: number, longitude: number } | null;
 };
 
-export default function CreateGameForm({ setIsCreateGameModalVisible }: CreateGameFormProps) {
+export default function CreateGameForm({ setIsCreateGameModalVisible, initialLocation }: CreateGameFormProps) {
     const [sportId, setSportId] = useState<string>('');
     const [googlePlaceId, setGooglePlaceId] = useState<string>('');
     const [name, setName] = useState('');
@@ -57,6 +58,47 @@ export default function CreateGameForm({ setIsCreateGameModalVisible }: CreateGa
         }
         fetchSports();
     }, []);
+
+    useEffect(() => {
+        if (initialLocation) {
+            const reverseGeocode = async () => {
+                try {
+                    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_PLACES_AI;
+                    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${initialLocation.latitude},${initialLocation.longitude}&key=${apiKey}`;
+                    
+                    const response = await fetch(url);
+                    const json = await response.json();
+                    
+                    if (json.status === 'OK' && json.results.length > 0) {
+                        const result = json.results[0];
+                        // Mock the 'data' part that parseGoogleAddress expects
+                        const mockData = {
+                            structured_formatting: {
+                                main_text: result.formatted_address.split(',')[0]
+                            },
+                            place_id: result.place_id
+                        };
+                        // Use result as 'details'
+                        const parsed = parseGoogleAddress(mockData, result);
+                        
+                        setStreetAddress(parsed.streetAddress);
+                        setCity(parsed.city);
+                        setState(parsed.state);
+                        setZipCode(parsed.zipCode);
+                        setCountry(parsed.country);
+                        setLatitude(initialLocation.latitude);
+                        setLongitude(initialLocation.longitude);
+                        setLocationName(parsed.locationName);
+                        setGooglePlaceId(parsed.googlePlaceId);
+                        setLocationDescription(parsed.locationDescription);
+                    }
+                } catch (err) {
+                    console.error("Failed to reverse geocode location", err);
+                }
+            };
+            reverseGeocode();
+        }
+    }, [initialLocation]);
 
     const handleLocationSelected = (data: any, details: any) => {
         const parsed = parseGoogleAddress(data, details);

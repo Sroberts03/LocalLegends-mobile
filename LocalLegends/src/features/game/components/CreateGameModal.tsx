@@ -7,10 +7,15 @@ import CreateGameForm from "./form/CreateGameForm";
 type CreateGameModalProps = {
     isVisible: boolean;
     setIsCreateGameModalVisible: (isVisible: boolean) => void;
+    initialLocation?: { latitude: number, longitude: number } | null;
+    onModalClose?: () => void;
 };
 
-export default function CreateGameModal({ isVisible, setIsCreateGameModalVisible }: CreateGameModalProps) {
-    const handleClose = () => setIsCreateGameModalVisible(false);
+export default function CreateGameModal({ isVisible, setIsCreateGameModalVisible, initialLocation, onModalClose }: CreateGameModalProps) {
+    const handleClose = () => {
+        setIsCreateGameModalVisible(false);
+        onModalClose?.();
+    };
 
     return (
         <Modal
@@ -32,7 +37,10 @@ export default function CreateGameModal({ isVisible, setIsCreateGameModalVisible
                                 </Pressable>
                             </View>
 
-                            <CreateGameForm setIsCreateGameModalVisible={setIsCreateGameModalVisible} />
+                            <CreateGameForm 
+                                setIsCreateGameModalVisible={setIsCreateGameModalVisible} 
+                                initialLocation={initialLocation}
+                            />
 
                         </View>
                     </TouchableWithoutFeedback>

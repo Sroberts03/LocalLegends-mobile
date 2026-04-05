@@ -29,6 +29,8 @@ type MapProps = {
         longitudeDelta: number;
     };
     onGamePress?: (game: GameWithDetails) => void;
+    onMapLongPress?: (coord: { latitude: number, longitude: number }) => void;
+    longPressCoord?: { latitude: number, longitude: number } | null;
 }
 
 // 1. The wrapper component with jitter logic
@@ -93,6 +95,8 @@ const Map = forwardRef<MapRef, MapProps>(({
     location,
     INITIAL_REGION,
     onGamePress,
+    onMapLongPress,
+    longPressCoord,
 }, ref) => {
     const mapRef = useRef<MapView>(null);
 
@@ -144,6 +148,7 @@ const Map = forwardRef<MapRef, MapProps>(({
                 initialRegion={userRegion}
                 showsUserLocation={true}
                 showsPointsOfInterest={false}
+                onLongPress={({ nativeEvent }) => onMapLongPress?.(nativeEvent.coordinate)}
             >
                 {Object.values(groupedGames).flatMap((group) =>
                     group.map((game, index) => (
@@ -156,6 +161,22 @@ const Map = forwardRef<MapRef, MapProps>(({
                             totalInGroup={group.length}
                         />
                     ))
+                )}
+
+                {longPressCoord && (
+                    <Marker
+                        coordinate={longPressCoord}
+                        title="New Game Location"
+                        description="Long-press to move pin"
+                        pinColor={COLORS.primary}
+                    >
+                        <View style={MapThemes.markerContainer}>
+                            <View style={[MapThemes.markerBadge, { backgroundColor: COLORS.primary }]}>
+                                <Ionicons name="add" size={24} color="#fff" />
+                            </View>
+                            <View style={[MapThemes.markerTail, { borderTopColor: COLORS.primary }]} />
+                        </View>
+                    </Marker>
                 )}
             </MapView>
 

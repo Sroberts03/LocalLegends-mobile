@@ -13,9 +13,12 @@ type GameDetailsModalProps = {
     game: GameWithDetails;
     onJoin?: () => void;
     onLeave?: () => void;
+    onAddressPress?: () => void;
 }
 
-export default function GameDetailsModal({ visible, onClose, game, onJoin, onLeave }: GameDetailsModalProps) {
+export default function GameDetailsModal(
+    { visible, onClose, game, onJoin, onLeave, onAddressPress }: GameDetailsModalProps
+) {
     const startTime = game?.game?.startTime ? new Date(game.game.startTime) : new Date();
     const endTime = game?.game?.endTime ? new Date(game.game.endTime) : new Date();
 
@@ -62,11 +65,13 @@ export default function GameDetailsModal({ visible, onClose, game, onJoin, onLea
                                     <Text style={gameDetailsModalThemes.cardValue}>{startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
                                     <Text style={gameDetailsModalThemes.cardSubValue}>{startTime.toLocaleDateString([], { month: 'short', day: 'numeric' })}</Text>
                                 </View>
-                                <View style={gameDetailsModalThemes.mainCard}>
-                                    <View style={gameDetailsModalThemes.cardIconRow}><Ionicons name="location" size={16} color="#e11d48" /><Text style={gameDetailsModalThemes.cardLabel}>Location</Text></View>
-                                    <Text style={gameDetailsModalThemes.cardValue} numberOfLines={1}>{game?.locationName}</Text>
-                                    <Text style={gameDetailsModalThemes.cardSubValue}>View on Map</Text>
-                                </View>
+                                <TouchableOpacity onPress={onAddressPress}>
+                                    <View style={gameDetailsModalThemes.mainCard}>
+                                        <View style={gameDetailsModalThemes.cardIconRow}><Ionicons name="location" size={16} color="#e11d48" /><Text style={gameDetailsModalThemes.cardLabel}>Location</Text></View>
+                                        <Text style={gameDetailsModalThemes.cardValue} numberOfLines={1}>{game?.locationName}</Text>
+                                        <Text style={gameDetailsModalThemes.cardSubValue}>View on Map</Text>
+                                    </View>
+                                </TouchableOpacity>
                             </View>
 
                             {/* Stats Grid */}

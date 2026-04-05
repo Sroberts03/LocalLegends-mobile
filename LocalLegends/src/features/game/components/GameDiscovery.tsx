@@ -1,6 +1,6 @@
 import CreateGameButton from "@/src/features/game/components/discoveryButtons/CreateGameButton";
 import { GameDiscoveryTheme } from "./themes/GameDiscoveryTheme";
-import { View } from "react-native";
+import { View, Alert, Platform, Linking } from "react-native";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import CreateGameModal from "./CreateGameModal";
 import { GameFilter, GameWithDetails } from "@/src/models/Game";
@@ -41,6 +41,7 @@ export default function GameDiscovery() {
     const [isModalVisible, setIsModalVisible] = useState(false);
     
     const [isCreateGameModalVisible, setIsCreateGameModalVisible] = useState(false);
+    const [longPressLocation, setLongPressLocation] = useState<{ latitude: number, longitude: number } | null>(null);
 
     const handleRefocus = () => {
         if (mapRef.current && location) {
@@ -67,6 +68,11 @@ export default function GameDiscovery() {
         }
     };
 
+    const handleMapLongPress = (coord: { latitude: number, longitude: number }) => {
+        setLongPressLocation(coord);
+        setIsCreateGameModalVisible(true);
+    };
+
     const handleLeave = async () => {
         if (!selectedGame) return;
         try {
@@ -74,6 +80,42 @@ export default function GameDiscovery() {
         } catch (error) {
             console.error("Failed to leave game:", error);
         }
+    };
+
+    const handleAddressPress = () => {
+        if (!selectedGame) return;
+        
+        const { latitude, longitude, locationName } = selectedGame;
+        const scheme = Platform.OS === 'ios' ? 'maps:' : 'geo:';
+        const url = Platform.select({
+            ios: `${scheme}0,0?q=${locationName}&ll=${latitude},${longitude}`,
+            android: `${scheme}${latitude},${longitude}?q=${locationName}`
+        });
+
+        Alert.alert(
+            "Open in Maps",
+            "Choose your preferred maps provider",
+            [
+                {
+                    text: "Apple Maps",
+                    onPress: () => {
+                        const appleUrl = `http://maps.apple.com/?q=${locationName}&ll=${latitude},${longitude}`;
+                        Linking.openURL(appleUrl);
+                    }
+                },
+                {
+                    text: "Google Maps",
+                    onPress: () => {
+                        const googleUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+                        Linking.openURL(googleUrl);
+                    }
+                },
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                }
+            ]
+        );
     };
 
     return (
@@ -92,6 +134,8 @@ export default function GameDiscovery() {
                     setLocation={() => {}} 
                     INITIAL_REGION={INITIAL_REGION}
                     onGamePress={handleMarkerPress}
+                    onMapLongPress={handleMapLongPress}
+                    longPressCoord={longPressLocation}
                 />
             </View>
             {!isInitialLoad && (
@@ -112,6 +156,8 @@ export default function GameDiscovery() {
             <CreateGameModal 
                 isVisible={isCreateGameModalVisible} 
                 setIsCreateGameModalVisible={setIsCreateGameModalVisible} 
+                initialLocation={longPressLocation}
+                onModalClose={() => setLongPressLocation(null)}
             />
             <FilterGameModal 
                 isVisible={isFilterModalVisible} 
@@ -126,6 +172,7 @@ export default function GameDiscovery() {
                 game={selectedGame!}
                 onJoin={handleJoin}
                 onLeave={handleLeave}
+                onAddressPress={handleAddressPress}
             />
         </View>
     );
